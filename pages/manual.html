@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<script src="./js/jquery-1.7.1.min.js"></script>	 			
+		<script src="./js/jquery-ui-1.8.17.custom.min.js"></script>	
+		<script src="./socket.io/socket.io.js" charset="UTF-8"></script>
+		<script type="text/javascript" charset="UTF-8" src="./js/screen.js"></script>	 	
+		
+		<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.17.custom.css">		
+		<link rel="stylesheet" href="css/main.css">				
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<head>
+	<body>
+		<div id="fb-root"></div>
+		Fornavn: <input type="text" name="firstName" value="Søren"><br>
+		Efternavn: <input type="text" name="lastName"><br>
+		Fødselsdato: <input type="text" name="dob" value="010189"><br>
+
+		<input type="radio" name="gender" value="male" checked="checked" /> Male <br />
+		<input type="radio" name="gender" value="female" /> Female <br>
+		<button type="submit" id="findValidNumbers">Find CPR</button></br>
+
+		Queueing:
+		<div class="stats queueing"></div>
+		
+		Completed:
+		<div class="stats completed"></div>
+		
+		Failed to lookup:
+		<div id="failed"></div>		
+
+		<div>
+			<span class="title">Correct CPR:</span>
+			<span id="correctCpr"> - </span>
+		</div>
+
+	</body>
+</html>

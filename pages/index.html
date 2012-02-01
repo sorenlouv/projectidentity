@@ -1,0 +1,40 @@
+<html>
+	<head>
+		<script src="./js/jquery-1.7.1.min.js"></script>	 			
+		<script src="./js/jquery-ui-1.8.17.custom.min.js"></script>	
+		<script src="./socket.io/socket.io.js" charset="UTF-8"></script>
+		<script type="text/javascript" charset="UTF-8" src="./js/screen.js"></script>	 	
+		
+		<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.17.custom.css">		
+		<link rel="stylesheet" href="css/main.css">				
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<head>
+	<body>
+		<div id="fb-root"></div>
+	
+		Queueing:
+		<div class="stats queueing"></div>
+		
+		Completed:
+		<div class="stats completed"></div>
+		
+		<!--
+		<div class="stats">
+			<span class="title">Queueing:</span>
+			<span id="queueing">0</span> / <span class="total">0</span>
+		</div>
+		<div class="stats">
+			<span class="title">Completed:</span>
+			<span id="completed">0</span> / <span class="total">0</span>
+		</div>
+		-->
+
+		<div>
+			<span class="title">Correct CPR:</span>
+			<span id="correctCpr"> - </span>
+		</div>
+
+		<button class="processFb">Find CPR-nummer</button>
+
+	</body>
+</html>

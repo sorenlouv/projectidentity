@@ -1,0 +1,13 @@
+{
+  "name": "project-identity",
+  "description": "A program utilizing the brainpower of young students to prove the vulnarabilities of Danish Govermental IT infrastructure",
+  "author": "sqren <sorenlouv@gmail.com>",
+  "version": "0.0.1",
+  "dependencies": {
+  	"jquery": "1.6.x",
+    "express": "2.5.x",
+    "step": "0.0.x",
+		"socket.io": "0.8.x"
+  },
+  "engine": "node >= 0.6.8"
+}
