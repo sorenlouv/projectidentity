@@ -116,7 +116,15 @@ function stopTimer(){
 /**
  * Socket behaviour
  *************************/
-var sio = io.connect(window.location.hostname);
+var sio = io.connect();
+
+sio.socket.on('error', function (reason){
+  console.error('Unable to connect Socket.IO', reason);
+});
+
+sio.on('connect', function (){
+  console.info('successfully established a working connection \o/');
+});
 
 // CPR number found
 sio.on('correctCPR', function (cpr) {
