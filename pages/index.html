@@ -10,31 +10,34 @@
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<head>
 	<body>
-		<div id="fb-root"></div>
 	
-		Queueing:
-		<div class="stats queueing"></div>
-		
-		Completed:
-		<div class="stats completed"></div>
-		
-		<!--
-		<div class="stats">
-			<span class="title">Queueing:</span>
-			<span id="queueing">0</span> / <span class="total">0</span>
-		</div>
-		<div class="stats">
-			<span class="title">Completed:</span>
-			<span id="completed">0</span> / <span class="total">0</span>
-		</div>
-		-->
+		<button id="processFb">Find CPR-nummer</button>
+		<button id="stopTimer">Stop</button>		
 
-		<div>
-			<span class="title">Correct CPR:</span>
-			<span id="correctCpr"> - </span>
+		<div id="progressbars">
+			<p class="title">I kø:</p>
+			<div class="progressbar queueing"></div>
+		
+			<p class="title">Afsluttet:</p>
+			<div class="progressbar completed"></div>
 		</div>
-
-		<button class="processFb">Find CPR-nummer</button>
+		
+		<div id="basicData">			
+			<span class="title">Personlige data:</span>
+			<p class="content"> </p>
+		</div>		
+			
+		<div id="correctCpr">			
+			<span class="title">Korrekt CPR-nummer:</span>
+			<span class="content"> - </span>
+		</div>
+		
+		<div id="failed">			
+			<span class="title">Fejl ved følgende opslag:</span>
+			<span class="content"> - </span>
+		</div>
+		
+		<div id="fb-root"></div>		
 
 	</body>
 </html>

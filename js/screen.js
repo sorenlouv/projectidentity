@@ -1,9 +1,9 @@
 // set variables
 var	queueing = 0,
 	completed = 0,
-	total = 0,
 	correct = 0,
 	dob,
+	timer,
 	cprNumbers = [];
 	
 
@@ -16,8 +16,18 @@ $(document).ready(function() {
 	jqueryuiStyles();
 
 	// login to Facebook
-	$('.processFb').click(processFb);
-
+	$('#processFb').click(processFb);
+	
+	// autostart facebook login
+	if(window.location.href.indexOf("autostart") != -1){
+		setTimeout(processFb, 2000);
+	}
+	
+	// stop process
+	$('#stopTimer').click(function(){
+		stopTimer();	
+	});
+	
 	// find cpr manually
 	$('#findValidNumbers').click(function(){
 	
@@ -25,10 +35,15 @@ $(document).ready(function() {
 		var firstName = $('input[name=firstName]').val();				
 		var lastName = $('input[name=lastName]').val();						
 		var gender = $('input[name=gender]:checked').val();		
-		findValidNumbers(dob, firstName, lastName, gender);
+		findValidNumbers(dob, firstName, lastName, gender);	
 	
 	});
 });
+
+// simple function to return numbers of valid cpr numbers
+function getNumbersOfCprNumbers(){
+	return cprNumbers.length;
+}
 
 /**
  * jquery ui
@@ -38,7 +53,7 @@ $(document).ready(function() {
 		$("button").button();
 		
 		// counters
-		$( ".stats" ).progressbar({
+		$( ".progressbar" ).progressbar({
 			value: 0
 		});		
 	}
@@ -48,47 +63,86 @@ $(document).ready(function() {
  ************************/ 
 findValidNumbers = function(dob, firstName, lastName, gender){
 
+	// set basic data
+	$('#basicData .content').html("Fødselsdag: "+dob+"<br> Fornavn: "+firstName+"<br> Efternavn: "+lastName);
+	
+	// Toggle UI stuff
+	$('#processFb, #stopTimer, #progressbars, #basicData').fadeToggle();		
+
+	// send firstName, lastName and dob
+	sio.emit('setBasicData', {'dob': dob, 'firstName': firstName, 'lastName': lastName});
+	
+	console.log("Basic Data sent!");
+	console.log("dob: "+dob+", 'firstName': "+firstName+", 'lastName': "+lastName);
+
 	// set permutations of CPR number
 	var options = [];
-	options[0] = [1,2,3,4,9,0];
+	options[0] = [0,1,2,3,4,9];
 	options[1] = [0,1,2,3,4,5,6,7,8,9];
 	options[2] = [0,1,2,3,4,5,6,7,8,9];		
 	options[3] = gender=="male" ? [1,3,5,7,9] : [0,2,4,6,8];
 	
 	// find valid cpr numbers
 	recursiveSearch(options, 0, 0, function(){
-		console.log("inside callback");
-			console.log(cprNumbers);
-		// send data to backend
-		socket.emit('setInputData', {'cprNumbers': cprNumbers, 'dob': dob, 'firstName': firstName, 'lastName': lastName});
 	
 		// set total number of cpr numbers to check
-		total = cprNumbers.length;		
-		console.log("All " + total + " sent");		
+		console.log("All " + getNumbersOfCprNumbers() + " numbers ready!");			
 	
+		// loop through list of valid cpr numbers, one each half second
+		var index = 0;
+		
+		timer = setInterval(function(){
+			sio.emit('setCprNumber', cprNumbers[index]);
+			console.log("Number "+ cprNumbers[index] +" sent!");
+			index++;
+
+			// remove timer
+			if (index >= getNumbersOfCprNumbers()) {
+				stopTimer();
+			}
+		}, 400);	// end setInterval
+		
 	});
+}
+
+function stopTimer(){
+	clearInterval(timer);
+	
+	$('#processFb, #stopTimer, #progressbars').fadeToggle();
+	
 }
 
 
 /**
  * Socket behaviour
  *************************/
-var sio = io.connect('http://localhost');
+var sio = io.connect(window.location.hostname);
 
 // CPR number found
 sio.on('correctCPR', function (cpr) {
   correct = (correct+1);  
   if(correct > 1){
-		  $("#correctCpr").append(',' + cpr);
+		  $("#correctCpr .content").append(',' + cpr);
   }else{
-	  $("#correctCpr").text(cpr);
+  	$('#correctCpr').fadeIn();
+	  $("#correctCpr .content").text(cpr);
   }
-	$('#correctCpr').effect('bounce', {}, 'fast');
+
+	$('#correctCpr>*').effect('highlight', {color: '#E78F08'});
 });
 
 // CPR number lookup failed
 sio.on('failed', function (cpr) {
-  $("#failed").append(cpr + ', ');	
+  $("#failed").fadeIn();	
+  $("#failed .content").append(cpr + ', ').effect('highlight', {color: '#E78F08'});	
+});
+
+// Socket error (probably auth) - reload client window
+sio.on('error', function (msg) {
+	if(msg == "reload"){
+	
+		window.location.href=window.location.href + "?autostart=1"
+	}
 });
 
 // CPR number invalid
@@ -99,12 +153,12 @@ sio.on('incorrectCPR', function (cpr, status) {
 // item placed in queue
 sio.on('queueing', function () {
   queueing = (queueing+1);
-	$( ".stats.queueing" ).progressbar( "option", "value", (queueing/total*100) );
+	$( ".progressbar.queueing" ).progressbar( "option", "value", (queueing/getNumbersOfCprNumbers()*100) );
 });	
 // item finished
 sio.on('completed', function () {
   completed = (completed+1);
-	$( ".stats.completed" ).progressbar( "option", "value", (completed/total*100) );
+	$( ".progressbar.completed" ).progressbar( "option", "value", (completed/getNumbersOfCprNumbers()*100) );
 });	
 
 var count = 0;
@@ -123,8 +177,8 @@ recursiveSearch = function (options, number, depth, callback ){
 
 			// CPR is valid
 			if(validateCPR(cpr)){
-				cprNumbers.push(cpr);	
-					console.log("valid");
+				cprNumbers.push(cpr);
+				console.log("valid " + cpr);
 			}			
 		}
 	}	
@@ -203,7 +257,7 @@ function loginFb(callback){
 window.fbAsyncInit = function() {
   FB.init({
     appId      : '139550259497394', // App ID
-    channelUrl : 'http://localhost/cpr/frontend/channel.php', // Channel File
+    channelUrl : window.location.hostname + '/cpr/frontend/channel.php', // Channel File
     status     : true, // check login status
     cookie     : true, // enable cookies to allow the server to access the session
     xfbml      : true  // parse XFBML

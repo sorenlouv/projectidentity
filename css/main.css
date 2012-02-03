@@ -1,3 +1,20 @@
 .ui-progressbar-value { 
 	background-image: url(../images/pbar-ani.gif); 
 }
+
+.title {
+	color: #aaa;
+	font-size: 1.2em;
+}
+
+/** Hidden on initial load **/
+#failed, #progressbars, #correctCpr, #basicData, #stopTimer {
+	display:none;
+}
+ {
+	display:none;
+}
+
+div {
+	margin: 20px 0;
+}

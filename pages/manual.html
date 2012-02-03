@@ -7,10 +7,8 @@
 		
 		<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.17.custom.css">		
 		<link rel="stylesheet" href="css/main.css">				
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<head>
-	<body>
-		<div id="fb-root"></div>
+	<body>	
 		Fornavn: <input type="text" name="firstName" value="Søren"><br>
 		Efternavn: <input type="text" name="lastName"><br>
 		Fødselsdato: <input type="text" name="dob" value="010189"><br>
@@ -19,19 +17,24 @@
 		<input type="radio" name="gender" value="female" /> Female <br>
 		<button type="submit" id="findValidNumbers">Find CPR</button></br>
 
-		Queueing:
-		<div class="stats queueing"></div>
 		
-		Completed:
-		<div class="stats completed"></div>
+		<div id="progressbars">
+			<p class="title">Queueing:</p>
+			<div class="progressbar queueing"></div>
 		
-		Failed to lookup:
-		<div id="failed"></div>		
-
-		<div>
-			<span class="title">Correct CPR:</span>
-			<span id="correctCpr"> - </span>
+			<p class="title">Completed:</p>
+			<div class="progressbar completed"></div>
 		</div>
-
+			
+		<div id="correctCpr">			
+			<span class="title">Correct CPR:</span>
+			<span class="content"> - </span>
+		</div>
+		
+		<div id="failed">			
+			<span class="title">Failed to lookup:</span>
+			<span class="content"> - </span>
+		</div>		
+	<div id="fb-root"></div>
 	</body>
 </html>
