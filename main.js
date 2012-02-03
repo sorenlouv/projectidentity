@@ -1,6 +1,8 @@
 var kutils = require("./utils/konUtils.js"),
 	Curl = require("./utils/Curl.js"),	  
-	
+	vendorSpecific = require("./vendors/Dummy.js"),
+	vendorBase = require("./vendorBase.js"),
+		
 	// npm modules
 	express = require('express'),
 	app = express.createServer(),	
@@ -8,7 +10,6 @@ var kutils = require("./utils/konUtils.js"),
 	$ = require("jquery"),	  
 	querystring = require("querystring"),
 	Step = require("step"),		
-	vendorSpecific = require("./vendors/Dummy.js"),
 	
 	// Session handling
   MemoryStore = express.session.MemoryStore,    
@@ -66,18 +67,21 @@ app.get('/', function(req, res){
  ******************************************/
 
 // authentication
-sio.sockets.on('connection', function (socket) {
+//sio.sockets.on('connection', function (socket) {
+sio.configure(function (){
 
 	// auth - happens on every client reload
 	sio.set('authorization', function (data, callback) {
+		kutils.debug("Authorizing", "", 1, "socket");
+		
 	  if (data.headers.cookie) {
 	  
 	  	// parse headers -> parse cookie -> get sessionID to retrieve the entire session later
 			data.cookie = parseCookie(data.headers.cookie);
 			data.sessionID = data.cookie['express.sid'];			    
       data.sessionStore = sessionStore;
-			
-			console.log('A socket with sessionID ' + data.sessionID + ' connected!');		
+
+			kutils.debug("Connect", 'A socket with sessionID ' + data.sessionID + ' connected!', 1, "socket");
 
 			// get entire session
 			sessionStore.get(data.sessionID, function (err, session) {
@@ -99,6 +103,7 @@ sio.sockets.on('connection', function (socket) {
 		// accept the incoming connection
 		callback(null, true);
 	});
+	
 });
 
 // get socket connection
@@ -108,15 +113,15 @@ sio.sockets.on('connection', function (socket) {
 	socket.on('setBasicData', function (basicData) {
 		var hs = socket.handshake;
 		
+		// hacky: abort if session is undefined
 		if(hs == undefined || hs.session == undefined){
 		  socket.emit('error', 'reload');
-			console.log("Error #1: hs is undefined!");
+			kutils.error("Socket error #1: hs is undefined!", hs);
 			return;
 		}
 	
-		if(hs.session.vendor == undefined){
+		if((hs.session.vendor != undefined && typeof hs.session.vendor.updatePlaceholders !== 'function') || hs.session.vendor == undefined){
 			hs.session.vendor = {};
-			var vendorBase = require("./vendorBase.js");
 			
 			// merge base with new session object
 			$.extend(hs.session.vendor, vendorBase);
@@ -138,7 +143,7 @@ sio.sockets.on('connection', function (socket) {
 						
 			// add to session and save
 			hs.session.save();
-			console.log(hs.session.vendor);			
+			kutils.debug("Session saved!", "", 0, "socket");
 		}
 				
 		// get vendor session cookie (not handshake session!!)
@@ -154,21 +159,28 @@ sio.sockets.on('connection', function (socket) {
 
 		var hs = socket.handshake;
 		
+		// hacky: abort if session cannot be retrieved
 		if(hs == undefined || hs.session == undefined){
-		  socket.emit('error', 'reload');		
-			console.log("Error #2: hs is undefined!");
+		  socket.emit('error', 'reload');
+			kutils.error("Socket error #2: hs is undefined!", hs);			
 			return;
 		}
 		
 		var vendorObj = {};
-		Step(function step1(){
-			return $.extend(true, vendorObj, hs.session.vendor);
+		Step(
+		
+			// clone session vendor object
+			function step1(){
+				return $.extend(true, vendorObj, hs.session.vendor);
+			
+			// set original cpr number (not formatted)			
 		},function step2(){
-			// set original cpr number (not formatted)
-			var originalCprNumber = vendorObj.dob + "" + cprNumber;				
-			return vendorObj.settings.originalCprNumber = originalCprNumber;	
-		}, function asda(){
-			init(socket, vendorObj);
+				var originalCprNumber = vendorObj.dob + "" + cprNumber;				
+				return vendorObj.settings.originalCprNumber = originalCprNumber;	
+			
+		// call init function with vendor object
+		}, function step3(){
+				init(socket, vendorObj);
 		})	
 	});			
 });
@@ -225,7 +237,7 @@ function init(socket, vendorObj){
 				kutils.debug("Correct CPR", cpr, 2, "getResponse");
 			}else{					
 				socket.emit('incorrectCPR', cpr, status);
-				//kutils.debug("Incorrect CPR", cpr + ' - ' + JSON.stringify(status), 2, "getResponse");
+				kutils.debug("Incorrect CPR", cpr + ' - ' + JSON.stringify(status), 2, "getResponse");
 			}
 
 			socket.emit('completed');

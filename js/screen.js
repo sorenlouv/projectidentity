@@ -4,6 +4,7 @@ var	queueing = 0,
 	correct = 0,
 	dob,
 	timer,
+	sio,
 	cprNumbers = [];
 	
 
@@ -63,13 +64,16 @@ function getNumbersOfCprNumbers(){
  ************************/ 
 findValidNumbers = function(dob, firstName, lastName, gender){
 
-	// set basic data
-	$('#basicData .content').html("Fødselsdag: "+dob+"<br> Fornavn: "+firstName+"<br> Efternavn: "+lastName);
-	
-	// Toggle UI stuff
-	$('#processFb, #stopTimer, #progressbars, #basicData').fadeToggle();		
+	// debug emit
+	sio.emit('test');
 
-	// send firstName, lastName and dob
+	// Toggle UI stuff
+	$('#processFb, #stopTimer, #progressbars, #basicData').fadeToggle();	
+
+	// set basic data
+	$('#basicData .content').html("Fødselsdag: "+dob+"<br> Fornavn: "+firstName+"<br> Efternavn: "+lastName);	
+
+	// send basic data
 	sio.emit('setBasicData', {'dob': dob, 'firstName': firstName, 'lastName': lastName});
 	
 	console.log("Basic Data sent!");
@@ -116,7 +120,7 @@ function stopTimer(){
 /**
  * Socket behaviour
  *************************/
-var sio = io.connect();
+sio = io.connect();
 
 sio.socket.on('error', function (reason){
   console.error('Unable to connect Socket.IO', reason);
@@ -148,8 +152,9 @@ sio.on('failed', function (cpr) {
 // Socket error (probably auth) - reload client window
 sio.on('error', function (msg) {
 	if(msg == "reload"){
-	
-		window.location.href=window.location.href + "?autostart=1"
+		console.info("Reconnect...");
+		window.location.hash = "#autostart=1";
+		window.location.reload(true);
 	}
 });
 
@@ -186,7 +191,6 @@ recursiveSearch = function (options, number, depth, callback ){
 			// CPR is valid
 			if(validateCPR(cpr)){
 				cprNumbers.push(cpr);
-				console.log("valid " + cpr);
 			}			
 		}
 	}	
