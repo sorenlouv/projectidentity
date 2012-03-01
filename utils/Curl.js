@@ -82,7 +82,7 @@ var Curl = {
 				req.commandArgs = args;
 				res.body = stdout;				
 				res.statusCode = (result_status != null && result_status[1] != undefined ) ? result_status[1] : 0;	
-				res.headers.location = result_location[1] != undefined ? result_location[1]: "";
+				res.headers.location = (result_location != null && result_location[1]) != undefined ? result_location[1]: "";
 			}    
     
 			// set error
