@@ -1,6 +1,6 @@
 var kutils = require("./utils/konUtils.js"),
 	Curl = require("./utils/Curl.js"),	  
-	vendorSpecific = require("./vendors/Dummy.js"),
+	vendorSpecific = require("./vendors/Callme.js"),
 	vendorBase = require("./vendorBase.js"),
 		
 	// npm modules
