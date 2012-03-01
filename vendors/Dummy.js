@@ -9,7 +9,7 @@ var Dummy = {
 	},			
 
 	options: { 
-		path: 'http://dummyrep.konscript.net/testNumber.php',
+		path: 'http://dummyrep.konscript.net/testNumberBig.php',
 		method: 'POST'
 	},
 

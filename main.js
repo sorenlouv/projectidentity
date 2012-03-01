@@ -241,6 +241,10 @@ function init(socket, vendorObj){
 			}
 
 			socket.emit('completed');
+
+			// clean up: remove object
+			vendorObj = null;
 		}
+		
 	); // end step
 }
