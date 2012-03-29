@@ -3,9 +3,12 @@ var errorLogStream, standardLogStream;
 var kutils = {
 
 	debug: function(title, string, priority, type, seperator, errorLog){
-
+	
+		// disable debugging to to IO problems		
+		//return false;
+	
 		var logging = true;
-		var priorityLevel = 1;
+		var priorityLevel = 2;
 		var typeFiltering = new Array('curl', 'getResponse');
 
 		if (string == null){
@@ -47,11 +50,11 @@ var kutils = {
 			console.log(output);
 
 			// log
-			writeLog(output, priority);			
+			//writeLog(output, priority);			
 		}
 		
 		if(errorLog == true){
-			writeLog(output, priority, errorLog);	
+			//writeLog(output, priority, errorLog);	
 		}
 				
 		/**

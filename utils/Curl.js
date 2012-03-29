@@ -40,13 +40,16 @@ var Curl = {
 		}
 		options.headers.host = options.path;	
 		
+    // setup curl arguments:
+    // -w: write-out. What info to extract
+    // -d: (post) data to send
+    // --socks5: proxy to TOR            		
 		var args = [
 			'-w {statusCode:%{http_code}; location:%{redirect_url};}',
 			'-d'+ data,
 			'--socks5', 'localhost:9050',
 			options.path];
 			
-		var curl;
 		if(options.cookie != ""){
 			args.push('-b ' + options.cookie)
 		}			
