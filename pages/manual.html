@@ -8,27 +8,29 @@
 		<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.17.custom.css">		
 		<link rel="stylesheet" href="css/main.css">				
 	<head>
-	<body>	
-		Fornavn: <input type="text" name="firstName" value="Søren"><br>
-		Efternavn: <input type="text" name="lastName"><br>
-		Fødselsdato: <input type="text" name="dob" value="010189"><br>
+	<body>
 
-		<input type="radio" name="gender" value="male" checked="checked" /> Male <br />
-		<input type="radio" name="gender" value="female" /> Female <br>
-		<button type="submit" id="findValidNumbers">Find CPR</button></br>
+		<div id="controllerContainer">
+			Fornavn: <input type="text" name="firstName" value="Søren"><br>
+			Efternavn: <input type="text" name="lastName"><br>
+			Fødselsdato: <input type="text" name="dob" value="010189"><br>
+
+			<div id="sex">
+				<input type="radio" name="gender" id="male" checked="checked" value="male"  /><label for="male">Mand</label>
+				<input type="radio" name="gender" id="female" value="female" /><label for="female">Kvinde</label>
+			</div>
+			<button type="submit" id="findValidNumbers">Find CPR</button></br>
+		</div>
 
 		<button id="stopTimer">Stop</button>		
 
-		<div id="progressbars">
-			<p class="title">I kø:</p>
-			<div class="progressbar queueing"></div>
-		
-			<p class="title">Afsluttet:</p>
+		<div id="progressbars">		
+			<p class="title">Status:</p>
 			<div class="progressbar completed"></div>
 		</div>
 		
-		<div id="basicData">			
-			<span class="title">Personlige data:</span>
+		<div id="inputData">			
+			<span class="title">Oplysninger:</span>
 			<p class="content"> </p>
 		</div>		
 			
@@ -37,12 +39,12 @@
 			<span class="content"> - </span>
 		</div>
 		
-		<div id="failed">			
+		<div id="failedCpr">			
 			<span class="title">Fejl ved følgende opslag:</span>
 			<span class="content"> - </span>
 		</div>
-		
-		<div id="fb-root"></div>	
-	<div id="fb-root"></div>
+
+
+
 	</body>
 </html>

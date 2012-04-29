@@ -8,10 +8,7 @@
 }
 
 /** Hidden on initial load **/
-#failed, #progressbars, #correctCpr, #basicData, #stopTimer {
-	display:none;
-}
- {
+#failedCpr, #correctCpr, #progressbars, #inputData, #stopTimer {
 	display:none;
 }
 
