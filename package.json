@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "dependencies": {
   	"jquery": "1.6.x",
+    "curlrequest": "0.3.2",
     "express": "2.5.x",
     "step": "0.0.x",
 		"socket.io": "0.8.x"
