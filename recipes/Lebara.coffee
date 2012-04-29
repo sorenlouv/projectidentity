@@ -24,8 +24,8 @@ class @Lebara extends Recipe.Recipe
 				cpr: inputData["dob"]+"-"+inputData["cprList"][0]
 
 			options:
-				#url: "https://mypage.lebara.dk/iframe/NOVcpr_iframe.asp"
-				url: "http://dummyrep.konscript.net/testNumberBig.php"
+				url: "https://mypage.lebara.dk/iframe/NOVcpr_iframe.asp"
+				#url: "http://dummyrep.konscript.net/testNumberBig.php"
 				method: "POST"
 				encoding: "UTF-8"
 

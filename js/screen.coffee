@@ -89,7 +89,7 @@ validateCPR = (cpr) ->
 
 # SOCKET.IO
 ##################
-socket = io.connect("http://localhost")
+socket = io.connect()
 
 socket.socket.on('error', (reason) ->
   console.error('Unable to connect Socket.IO', reason);

@@ -93,7 +93,7 @@
     }
   };
 
-  socket = io.connect("http://localhost");
+  socket = io.connect();
 
   socket.socket.on('error', function(reason) {
     return console.error('Unable to connect Socket.IO', reason);
