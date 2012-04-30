@@ -1,52 +1,55 @@
 <html>
 	<head>
-		<script src="./js/jquery-1.7.1.min.js"></script>	 			
-		<script src="./js/jquery-ui-1.8.17.custom.min.js"></script>	
-		<script src="./socket.io/socket.io.js" charset="UTF-8"></script>
-		<script type="text/javascript" charset="UTF-8" src="./js/Calc.js"></script>
-		<script type="text/javascript" charset="UTF-8" src="./js/screen.js"></script> 	
+		<script src="js/jquery-1.7.2.min.js"></script>	 			
+		<script src="js/jquery-ui-1.8.19.custom.min.js"></script>	
+		<script src="socket.io/socket.io.js" charset="UTF-8"></script> 	
+		<script type="text/javascript" charset="UTF-8" src="js/Calc.js"></script>
+		<script type="text/javascript" charset="UTF-8" src="js/screen.js"></script>
 		
-		<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.17.custom.css">		
+		<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.19.custom.css">		
 		<link rel="stylesheet" href="css/main.css">				
+		<link href='http://fonts.googleapis.com/css?family=Special+Elite' rel='stylesheet' type='text/css'>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<head>
 	<body>
 
-		<div id="controllerContainer">
-			Fornavn: <input type="text" name="firstName" value="Søren"><br>
-			Efternavn: <input type="text" name="lastName"><br>
-			Fødselsdato: <input type="text" name="dob" value="010189"><br>
+		<h1>Project Identity</h1>
+		<div id="wrapper">
 
-			<div id="sex">
-				<input type="radio" name="gender" id="male" checked="checked" value="male"  /><label for="male">Mand</label>
-				<input type="radio" name="gender" id="female" value="female" /><label for="female">Kvinde</label>
-			</div>
+			<h2>Experimental CPR brute-force tool</h2>
+
+			<div id="fb-root"></div>
+			<div class="form-label">Fornavn:</div> <input type="text" name="firstName" value="Søren"><br>
+			<div class="form-label">Efternavn:</div> <input type="text" name="lastName"><br>
+			<div class="form-label">Fødselsdato:</div> <input type="text" name="dob" value="010189"><br>
+
+			<input type="radio" name="gender" value="male" checked="checked" /> Mand <br />
+			<input type="radio" name="gender" value="female" /> Kvinde <br>
 			<button type="submit" id="findValidNumbers">Find CPR</button></br>
-		</div>
-
-		<button id="stopTimer">Stop</button>		
-
-		<div id="progressbars">		
-			<p class="title">Status:</p>
-			<div class="progressbar completed"></div>
-		</div>
-		
-		<div id="inputData">			
-			<span class="title">Oplysninger:</span>
-			<p class="content"> </p>
-		</div>		
 			
-		<div id="correctCpr">			
-			<span class="title">Korrekt CPR-nummer:</span>
-			<span class="content"></span>
-		</div>
-		
-		<div id="failedCpr">			
-			<span class="title">Fejl ved følgende opslag:</span>
-			<span class="content"> - </span>
-		</div>
+			<p>Udførte forespørgelser:</p>
+			<div class="stats completed"></div>
+			<!--
+			<p>Fejlopslag:</p>
+			<div id="failedCpr"></div>		
+			-->
 
-		<h2>Activity log</h2>
-		<div id="failedNumbers"></div>
+			<div id="correct-cpr">
+				<span class="title">Korrekt CPR:</span>
+				<span id="correctCpr"></span>
+			</div>
 
+			<div id="affilitates">
+				Søren Louv-Jansen & Lasse Boisen Andersen<br />
+				Konscript - Købstaden - ITU Innovators
+			</div>
+
+			<div class="accordion">
+				<h3>Activity log</h3>
+				<div id="failedNumbers"></div>	
+			</div>
+			
+			
+		</div>
 	</body>
 </html>

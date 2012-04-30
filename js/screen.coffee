@@ -11,8 +11,8 @@ $(document).ready ->
 		collapsible: true
 
    	# UI
-	$("button").button()
-	$(".progressbar").progressbar value: 0
+	$("button").button();
+	$(".stats").progressbar value: 0
 	$( "#sex" ).buttonset();
 
 	# next preparation step
@@ -38,8 +38,7 @@ socket.on('correctCpr', (data) ->
 	addToProgressbar()
 	console.log("Correct: " + data.cpr);
 
-	$('#correctCpr').fadeIn();
-	$("#correctCpr .content").append(data.cpr + ',').effect('highlight', {color: '#E78F08'});	
+	$("#correctCpr").append(data.cpr + ' ').effect('highlight', {color: '#E78F08'});	
 );
 
 # CPR number invalid
@@ -55,9 +54,8 @@ socket.on('incorrectCpr', (data) ->
 # CPR number lookup failed
 socket.on('lookupFailed', (data) ->
 	addToProgressbar()
-
-	$("#failedCpr").fadeIn();	
-	$("#failedCpr .content").append(data.cpr + ', ').effect('highlight', {color: '#E78F08'});	
+	
+	$("#failedCpr").append(data.cpr + ' ').effect('highlight', {color: '#E78F08'});	
 );
 
 # server waiting for client
@@ -106,7 +104,7 @@ countCprList = ->
 
 addToProgressbar = ->
 	countCompleted++
-	$( ".progressbar.completed" ).progressbar( "option", "value", (countCompleted/countCprList()*100) );
+	$( ".stats.completed" ).progressbar( "option", "value", (countCompleted/countCprList()*100) );
 
 setInputData = ->
 	dob = $("input[name=dob]").val()
@@ -125,7 +123,3 @@ setInputData = ->
 				firstName: firstName
 				lastName: lastName
 				cprList: cprList
-
-		# hide controller element and show progress bar
-		$("#processFb, #stopTimer, #progressbars, #controllerContainer, #inputData").fadeToggle()
-		$("#inputData .content").html("Fødselsdag: " + dob + "<br> Fornavn: " + firstName + "<br> Efternavn: " + lastName).fadeIn()

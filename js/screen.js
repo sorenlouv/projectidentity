@@ -16,7 +16,7 @@
       collapsible: true
     });
     $("button").button();
-    $(".progressbar").progressbar({
+    $(".stats").progressbar({
       value: 0
     });
     $("#sex").buttonset();
@@ -36,8 +36,7 @@
   socket.on('correctCpr', function(data) {
     addToProgressbar();
     console.log("Correct: " + data.cpr);
-    $('#correctCpr').fadeIn();
-    return $("#correctCpr .content").append(data.cpr + ',').effect('highlight', {
+    return $("#correctCpr").append(data.cpr + ' ').effect('highlight', {
       color: '#E78F08'
     });
   });
@@ -58,8 +57,7 @@
 
   socket.on('lookupFailed', function(data) {
     addToProgressbar();
-    $("#failedCpr").fadeIn();
-    return $("#failedCpr .content").append(data.cpr + ', ').effect('highlight', {
+    return $("#failedCpr").append(data.cpr + ' ').effect('highlight', {
       color: '#E78F08'
     });
   });
@@ -102,7 +100,7 @@
 
   addToProgressbar = function() {
     countCompleted++;
-    return $(".progressbar.completed").progressbar("option", "value", countCompleted / countCprList() * 100);
+    return $(".stats.completed").progressbar("option", "value", countCompleted / countCprList() * 100);
   };
 
   setInputData = function() {
@@ -115,7 +113,7 @@
     return generateCombinations(dob, firstName, lastName, gender, function(cprList) {
       console.log(cprList);
       _this.cprList = cprList;
-      socket.emit("setInputData", {
+      return socket.emit("setInputData", {
         inputData: {
           dob: dob,
           firstName: firstName,
@@ -123,8 +121,6 @@
           cprList: cprList
         }
       });
-      $("#processFb, #stopTimer, #progressbars, #controllerContainer, #inputData").fadeToggle();
-      return $("#inputData .content").html("Fødselsdag: " + dob + "<br> Fornavn: " + firstName + "<br> Efternavn: " + lastName).fadeIn();
     });
   };
 

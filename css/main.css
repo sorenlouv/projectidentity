@@ -1,10 +1,62 @@
 .ui-progressbar-value { background-image: url(../images/pbar-ani.gif); }
 
-.title {
-	color: #aaa;
-	font-size: 1.2em;
+*, body {
+	font-family: Helvetica, sans-serif;
+	font-size: 13px;
 }
 
-/** Hidden on initial load **/
-#failedCpr, #correctCpr, #progressbars, #inputData, #stopTimer { display:none;}
-div { margin: 20px 0; }
+body {
+	background: #222;
+	background-image: url('../images/bg.jpg'); 
+	background-repeat: repeat;
+}
+
+#wrapper {
+	width: 500px;
+	margin: 0 auto;
+	padding: 20px;
+	border-radius: 3px;
+	background: #fff;
+}
+
+h1 {
+	width: 500px;
+	margin: 20px auto;
+	display: block;
+	font-family: 'Special Elite', cursive;
+	font-size: 60px;
+	color: white;
+	text-align:center;
+}
+
+h2 {
+	border-bottom: 1px dotted #CCC;
+	padding-bottom: 20px; 
+	color: orange;
+}
+
+.form-label {
+	float: left;
+	width: 100px;
+	padding: 5px 0;
+}
+input {
+	border:1px solid #CCC;
+	border-radius: 3px;
+	padding: 5px;
+}
+
+#correct-cpr .title {
+	color: green;
+}
+
+.ui-progressbar-value { 
+	background-image: url(../images/pbar-ani.gif); 
+}
+
+#affilitates {
+	margin-top: 20px;
+	padding-top: 20px;
+	border-top: 1px dotted #CCC;
+	color: #CCC;
+}
