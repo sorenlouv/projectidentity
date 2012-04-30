@@ -35,6 +35,7 @@
 
   socket.on('correctCpr', function(data) {
     addToProgressbar();
+    console.log("Correct: " + data.cpr);
     $('#correctCpr').fadeIn();
     return $("#correctCpr .content").append(data.cpr + ',').effect('highlight', {
       color: '#E78F08'
@@ -42,8 +43,17 @@
   });
 
   socket.on('incorrectCpr', function(data) {
+    var container;
     addToProgressbar();
-    return console.log(data.cpr);
+    console.log("Incorrect: " + data.cpr);
+    container = $('<div></div>');
+    $('<p></p>', {
+      text: "CPR: " + data.cpr
+    }).appendTo(container);
+    $('<p></p>', {
+      text: "Error message: " + data.msg
+    }).appendTo(container);
+    return container.prependTo('#failedNumbers');
   });
 
   socket.on('lookupFailed', function(data) {
@@ -64,8 +74,10 @@
     var body;
     console.log(data);
     $(".accordion div").html("");
-    $("#requestUrl").html(data.req.url);
-    if (data.res.body != null) {
+    if (data.req != null) {
+      $("#requestUrl").html(data.req.url);
+    }
+    if (data.res != null) {
       body = $(data.res.body.replace(/<script[\d\D]*?>[\d\D]*?<\/script>/g, ""), "body");
       if (body.find(data.domTarget).length === 0) {
         body.appendTo("#responseBody");
@@ -73,10 +85,13 @@
         body.find(data.domTarget).appendTo("#responseBody");
       }
     }
-    if (data.res.head != null) {
+    if (data.res != null) {
       $("#responseHeader").html(data.res.head.replace(/\n/g, "<br />"));
     }
     $("#errors").html(JSON.stringify(data.err));
+    if (data.err != null) {
+      $(".accordion").accordion("activate", 3);
+    }
     $("#requestHeader").html(JSON.stringify(data.req));
     return $(".accordion").accordion("resize");
   });
@@ -98,12 +113,15 @@
     lastName = $("input[name=lastName]").val();
     gender = $("input[name=gender]:checked").val();
     return generateCombinations(dob, firstName, lastName, gender, function(cprList) {
+      console.log(cprList);
       _this.cprList = cprList;
       socket.emit("setInputData", {
-        dob: dob,
-        firstName: firstName,
-        lastName: lastName,
-        cprList: cprList
+        inputData: {
+          dob: dob,
+          firstName: firstName,
+          lastName: lastName,
+          cprList: cprList
+        }
       });
       $("#processFb, #stopTimer, #progressbars, #controllerContainer, #inputData").fadeToggle();
       return $("#inputData .content").html("Fødselsdag: " + dob + "<br> Fornavn: " + firstName + "<br> Efternavn: " + lastName).fadeIn();

@@ -1,9 +1,9 @@
 curlrequest = require("curlrequest")
-splitResponse = require("./splitResponse.js")
+Utils = require("./Utils.js")
 $ = require("jquery")
 
 Curl =
-  scrape: (req_specific, callback) ->
+  scrape: (req_specific, callback, settings = {}) ->
     console.log "Scraping: " + req_specific.url
 
     # set default request arguments
@@ -12,21 +12,25 @@ Curl =
       include: true   # include header
       timeout: 10     # timeout after x sec
       'retries': 3      # retry x times
-      'location': 'false' # don't follow redirects
+      location: false # don't follow redirects
       #'socks5': 'localhost:9050' # proxy through Tor
-      # --data-urlencode
-      # encoding
-      # --Form -f
 
     # merge into req
     $.extend(req, req_specific);
 
+    # encode data with utf8 as default
+    if req.data?
+      if settings.urlencoding?
+        req.data = Utils.dataUrlEncode(req.data, settings.urlencoding)
+      else
+        req.data = Utils.dataUrlEncode(req.data, "utf8")
+      
     # make curl request
     curl_request = curlrequest.request(req, (err, res_raw) ->
       #console.log "Scraping finished " + curl_request
       
       # format response into head and body (and location + status_code)
-      res = splitResponse(res_raw) if res_raw?
+      res = Utils.splitResponse(res_raw) if res_raw?
 
       # callback with response
       callback req, res, err 

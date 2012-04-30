@@ -25,6 +25,8 @@
       }
     };
 
+    Recipe.settings = {};
+
     Recipe.inputData = {
       cprList: {}
     };
@@ -39,26 +41,25 @@
       });
     };
 
-    Recipe.prototype.getResponse = function(req, res, err, callback) {
+    Recipe.prototype.getResponse = function(req, res, callback) {
       return console.log("Warning: An implementation of 'getResponse' must be made");
     };
 
-    Recipe.prototype.afterGetResponse = function(cpr, status, html) {
+    Recipe.prototype.afterGetResponse = function(cpr, status, msg) {
       if (status === "success") {
         this.socket.emit("correctCpr", {
-          cpr: cpr,
-          html: html
+          cpr: cpr
         });
         return this.completed = true;
       } else {
         return this.socket.emit("incorrectCpr", {
           cpr: cpr,
-          html: html
+          msg: msg
         });
       }
     };
 
-    Recipe.prototype.waitForClient = function(name, req, res, err, callback) {
+    Recipe.prototype.waitForClient = function(name, req, res, err, nextStep) {
       if (debug_mode === true) {
         this.renderPreparationResponse(req, res, err);
         console.log("Waiting for client: " + name);
@@ -66,15 +67,15 @@
           name: name
         });
         return this.socket.once("next", function() {
-          return callback(res);
+          return nextStep(res);
         });
       } else {
-        return callback(res);
+        return nextStep(res);
       }
     };
 
-    Recipe.prototype.prepareRequest = function(callback) {
-      return callback();
+    Recipe.prototype.prepareRequest = function(startBruteForce) {
+      return startBruteForce();
     };
 
     Recipe.prototype.updateCPR = function(counter) {
@@ -96,7 +97,7 @@
             return self.bruteForce();
           }
         });
-      });
+      }, this.settings);
     };
 
     return Recipe;

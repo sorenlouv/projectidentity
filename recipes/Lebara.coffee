@@ -8,35 +8,33 @@ class @Lebara extends Recipe.Recipe
 	# constructor
 	constructor: (inputData, socket) ->
 
-		@counter = 0
 		@inputData = inputData
 		@socket = socket
+		@counter = 0
 		@domTarget = ""
 
 		@req =
+			url: "https://mypage.lebara.dk/iframe/NOVcpr_iframe.asp"
 			data:
 				cprok: "on"
 				email: "test@ofir.dk"
 				password1: "test1234"
 				password2: "test1234"
 				navn: inputData["firstName"] + " " + inputData["lastName"]
-				cpr: inputData["dob"]+"-"+inputData["cprList"][0]
-
-			options:
-				url: "https://mypage.lebara.dk/iframe/NOVcpr_iframe.asp"
-				#url: "http://dummyrep.konscript.net/testNumberBig.php"
-				method: "POST"
-				encoding: "UTF-8"
+				cpr: inputData["dob"]+"-"+inputData["cprList"][0]							
 
 	updateCPR: ->
 		@req.data.cpr = @inputData["dob"]+"-"+@inputData["cprList"][@counter]
 
-	getResponse: (req, res, err, callback) ->
+	getResponse: (req, res, callback) ->
 		
 		html = res.body
 		cpr = querystring.parse(req.data).cpr
+		msg = /alert\('(.+)'\)/.exec(html);
 		
 		if html.indexOf("NOVBetal") > -1
-		  callback cpr, "success", html
+		  callback cpr, "success", ""
 		else
-		  callback cpr, "error", html
+		  callback cpr, "error", msg[1]
+
+module.exports = @Lebara

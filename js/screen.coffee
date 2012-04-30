@@ -36,6 +36,7 @@ socket.socket.on('error', (reason) ->
 # CPR number found
 socket.on('correctCpr', (data) ->
 	addToProgressbar()
+	console.log("Correct: " + data.cpr);
 
 	$('#correctCpr').fadeIn();
 	$("#correctCpr .content").append(data.cpr + ',').effect('highlight', {color: '#E78F08'});	
@@ -44,7 +45,11 @@ socket.on('correctCpr', (data) ->
 # CPR number invalid
 socket.on('incorrectCpr', (data) ->
 	addToProgressbar()
-	console.log(data.cpr);
+	console.log("Incorrect: " + data.cpr);
+	container = $('<div></div>');
+	$('<p></p>', { text: "CPR: " + data.cpr }).appendTo(container);
+	$('<p></p>', { text: "Error message: " + data.msg }).appendTo(container);	
+	container.prependTo('#failedNumbers')
 );
 
 # CPR number lookup failed
@@ -64,16 +69,16 @@ socket.on "waitForClient", (data) ->
 # receive response from server
 socket.on "renderPreparationResponse", (data) ->
 	# Debug
-	console.log data
+	console.log data	
 
 	# reset
 	$(".accordion div").html ""
 
 	# set url
-	$("#requestUrl").html data.req.url
+	$("#requestUrl").html data.req.url if data.req?
 
 	# set response body
-	if data.res.body?
+	if data.res?
 		body = $(data.res.body.replace(/<script[\d\D]*?>[\d\D]*?<\/script>/g, ""), "body")
 		if body.find(data.domTarget).length is 0
 			body.appendTo "#responseBody"
@@ -81,10 +86,11 @@ socket.on "renderPreparationResponse", (data) ->
 			body.find(data.domTarget).appendTo "#responseBody"
 
 	# set resp. header			
-	$("#responseHeader").html data.res.head.replace(/\n/g, "<br />") if data.res.head?
+	$("#responseHeader").html data.res.head.replace(/\n/g, "<br />") if data.res?
 		
 	# set errors
 	$("#errors").html JSON.stringify(data.err)
+	$(".accordion").accordion( "activate" , 3 ) if data.err?
 
 	# set request header
 	$("#requestHeader").html JSON.stringify(data.req)
@@ -108,15 +114,17 @@ setInputData = ->
 	lastName = $("input[name=lastName]").val()
 	gender = $("input[name=gender]:checked").val()
 
-	generateCombinations dob, firstName, lastName, gender, (cprList) =>		
+	generateCombinations dob, firstName, lastName, gender, (cprList) =>
+		console.log cprList 
 		@cprList = cprList
 
 		# send input data to server
 		socket.emit "setInputData",
-			dob: dob
-			firstName: firstName
-			lastName: lastName
-			cprList: cprList			
+			inputData: 
+				dob: dob
+				firstName: firstName
+				lastName: lastName
+				cprList: cprList
 
 		# hide controller element and show progress bar
 		$("#processFb, #stopTimer, #progressbars, #controllerContainer, #inputData").fadeToggle()

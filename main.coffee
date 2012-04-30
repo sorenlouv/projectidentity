@@ -1,13 +1,12 @@
-callme = require("./recipes/Callme.js")
+Recipe = require("./recipes/Callme.js")
 express = require("express")
 app = express.createServer()
 app.listen(3000)
 io = require("socket.io").listen(app);
 io.set('log level', 0); 
-inputDebugger = require("./utils/inputDebugger.js")
 
-# only use in debug_mode together with debugger.html (view)
-GLOBAL.debug_mode = true
+# set debug mode
+GLOBAL.debug_mode = false
 
 # routing
 app.use express.bodyParser()
@@ -30,10 +29,17 @@ app.get "/", (req, res) ->
 io.sockets.on('connection', (socket) ->
 
 	# start app when input data is received from client
-	socket.on("setInputData", (inputData) ->
-		recipe = new callme.Callme(inputData, socket)
-		recipe.prepareRequest () ->
-			recipe.bruteForce()
+	socket.on("setInputData", (data) ->
+
+		# debug mode for debugger.html
+		GLOBAL.debug_mode = true if data.debug_mode? 
+
+		if data.session_cookie?
+			new Recipe(data.inputData, socket, data.session_cookie)
+		else
+			recipe = new Recipe(data.inputData, socket)
+			recipe.prepareRequest () ->
+				recipe.bruteForce()
 	)
 );
 

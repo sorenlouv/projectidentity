@@ -6,8 +6,11 @@
 
   this.cprList = [];
 
+  this.dob = 0;
+
   this.generateCombinations = function(dob, firstName, lastName, gender, setCprList_cb) {
     var options;
+    this.dob = dob;
     options = [];
     options[0] = [0, 1, 2, 3, 4, 9];
     options[1] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -43,7 +46,7 @@
 
   validateCPR = function(cpr) {
     var factors, fullcpr, i, sum;
-    fullcpr = dob + cpr;
+    fullcpr = this.dob + cpr;
     sum = 0;
     factors = [4, 3, 2, 7, 6, 5, 4, 3, 2, 1];
     i = 0;

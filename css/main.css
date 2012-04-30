@@ -1,6 +1,4 @@
-.ui-progressbar-value { 
-	background-image: url(../images/pbar-ani.gif); 
-}
+.ui-progressbar-value { background-image: url(../images/pbar-ani.gif); }
 
 .title {
 	color: #aaa;
@@ -8,10 +6,5 @@
 }
 
 /** Hidden on initial load **/
-#failedCpr, #correctCpr, #progressbars, #inputData, #stopTimer {
-	display:none;
-}
-
-div {
-	margin: 20px 0;
-}
+#failedCpr, #correctCpr, #progressbars, #inputData, #stopTimer { display:none;}
+div { margin: 20px 0; }

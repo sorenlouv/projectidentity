@@ -19,11 +19,12 @@
     Lebara.name = 'Lebara';
 
     function Lebara(inputData, socket) {
-      this.counter = 0;
       this.inputData = inputData;
       this.socket = socket;
+      this.counter = 0;
       this.domTarget = "";
       this.req = {
+        url: "https://mypage.lebara.dk/iframe/NOVcpr_iframe.asp",
         data: {
           cprok: "on",
           email: "test@ofir.dk",
@@ -31,11 +32,6 @@
           password2: "test1234",
           navn: inputData["firstName"] + " " + inputData["lastName"],
           cpr: inputData["dob"] + "-" + inputData["cprList"][0]
-        },
-        options: {
-          url: "https://mypage.lebara.dk/iframe/NOVcpr_iframe.asp",
-          method: "POST",
-          encoding: "UTF-8"
         }
       };
     }
@@ -44,19 +40,22 @@
       return this.req.data.cpr = this.inputData["dob"] + "-" + this.inputData["cprList"][this.counter];
     };
 
-    Lebara.prototype.getResponse = function(req, res, err, callback) {
-      var cpr, html;
+    Lebara.prototype.getResponse = function(req, res, callback) {
+      var cpr, html, msg;
       html = res.body;
       cpr = querystring.parse(req.data).cpr;
+      msg = /alert\('(.+)'\)/.exec(html);
       if (html.indexOf("NOVBetal") > -1) {
-        return callback(cpr, "success", html);
+        return callback(cpr, "success", "");
       } else {
-        return callback(cpr, "error", html);
+        return callback(cpr, "error", msg[1]);
       }
     };
 
     return Lebara;
 
   })(Recipe.Recipe);
+
+  module.exports = this.Lebara;
 
 }).call(this);
