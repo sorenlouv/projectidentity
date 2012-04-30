@@ -14,12 +14,13 @@ class @Recipe
     cprList: {}
   }
 
-  renderPreparationResponse: (req, res, err, callback) ->
+  renderPreparationResponse: (req, res, err) ->
     console.log("Page loaded")
     @socket.emit "renderPreparationResponse", req: req, err: err, res: res, domTarget: @domTarget
-    callback(req)
 
   getResponse: (req, res, err, callback) ->
+    console.log("Warning: An implementation of 'getResponse' must be made")
+    #callback("cpr", "status", "html")
 
   afterGetResponse: (cpr, status, html) ->
     if status is "success"
@@ -28,25 +29,38 @@ class @Recipe
     else
       @socket.emit "incorrectCpr", cpr: cpr, html: html
 
-  waitForClient: (name, res, callback) ->
-    console.log("Waiting for client " + name)
-    @socket.emit("waitForClient", {name: name})
-    @socket.once "next", () ->
+  waitForClient: (name, req, res, err, callback) ->
+    # in dev: only invoke function when client clicks next
+    if debug_mode is true
+
+      # send all info to client
+      @renderPreparationResponse(req, res, err) 
+
+      console.log("Waiting for client: " + name)
+      @socket.emit("waitForClient", {name: name})
+      
+      @socket.once "next", () -> 
+        callback res
+    # in prod: return response immediately
+    else
       callback res
 
   prepareRequest: (callback) ->
     callback()
 
-  updateCPR: ->
+  updateCPR: (counter) ->
+    console.log("Warning: An implementation of 'updateCPR' must be made")
 
-  bruteForce: ->    
+  bruteForce: () ->
     self = @
     Curl.scrape @req, (req, res, err) ->
-      self.getResponse req, res, err, (cpr, status, html) ->
-        console.log("Bruteforcing: " + cpr)
 
+      # debugging
+      self.renderPreparationResponse(req, res, err) if debug_mode is true
+
+      # get response from recipe
+      self.getResponse req, res, (cpr, status, html) ->        
         self.afterGetResponse(cpr, status, html)
-
         self.counter++
         self.updateCPR()
 

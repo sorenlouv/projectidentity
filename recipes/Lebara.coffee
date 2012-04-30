@@ -13,7 +13,6 @@ class @Lebara extends Recipe.Recipe
 		@socket = socket
 		@domTarget = ""
 
-
 		@req =
 			data:
 				cprok: "on"

@@ -13,10 +13,10 @@ class @Dummy extends Recipe.Recipe
 		# DOM target
 		@domTarget = "div.indhold"
 
-		#
-		@counter = 0
-
 		@req =
+			url: "http://dummyrep.konscript.net/testNumberBig.php"
+			method: "POST"
+			encoding: "UTF-8"		
 			data:
 				cprok: "on"
 				email: "test@ofir.dk"
@@ -25,15 +25,7 @@ class @Dummy extends Recipe.Recipe
 				fornavn: inputData["firstName"]
 				efternavn: inputData["lastName"]
 				cpr: inputData["birthday"]+""+inputData["cprList"][0]
-
-			options:
-				url: "http://dummyrep.konscript.net/testNumberBig.php"
-				method: "POST"
-				encoding: "UTF-8"
-
-
 	self = @
-
 	prepareRequest: (callback) ->
 		console.log("Prepare request started")
 
@@ -66,9 +58,8 @@ class @Dummy extends Recipe.Recipe
 		# get phone number
 		@step2 = (res, callback) ->
 			req =
-				options:
-					url: 'https://www.oister.dk/Mobil/Shopflow/Vaelg-nummer/',
-					cookies: self.cookieA
+				url: 'https://www.oister.dk/Mobil/Shopflow/Vaelg-nummer/',
+				cookies: self.cookieA
 
 			Curl.scrape req, self.renderPreparationResponse
 

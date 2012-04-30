@@ -29,18 +29,19 @@
       cprList: {}
     };
 
-    Recipe.prototype.renderPreparationResponse = function(req, res, err, callback) {
+    Recipe.prototype.renderPreparationResponse = function(req, res, err) {
       console.log("Page loaded");
-      this.socket.emit("renderPreparationResponse", {
+      return this.socket.emit("renderPreparationResponse", {
         req: req,
         err: err,
         res: res,
         domTarget: this.domTarget
       });
-      return callback(req);
     };
 
-    Recipe.prototype.getResponse = function(req, res, err, callback) {};
+    Recipe.prototype.getResponse = function(req, res, err, callback) {
+      return console.log("Warning: An implementation of 'getResponse' must be made");
+    };
 
     Recipe.prototype.afterGetResponse = function(cpr, status, html) {
       if (status === "success") {
@@ -57,28 +58,37 @@
       }
     };
 
-    Recipe.prototype.waitForClient = function(name, res, callback) {
-      console.log("Waiting for client " + name);
-      this.socket.emit("waitForClient", {
-        name: name
-      });
-      return this.socket.once("next", function() {
+    Recipe.prototype.waitForClient = function(name, req, res, err, callback) {
+      if (debug_mode === true) {
+        this.renderPreparationResponse(req, res, err);
+        console.log("Waiting for client: " + name);
+        this.socket.emit("waitForClient", {
+          name: name
+        });
+        return this.socket.once("next", function() {
+          return callback(res);
+        });
+      } else {
         return callback(res);
-      });
+      }
     };
 
     Recipe.prototype.prepareRequest = function(callback) {
       return callback();
     };
 
-    Recipe.prototype.updateCPR = function() {};
+    Recipe.prototype.updateCPR = function(counter) {
+      return console.log("Warning: An implementation of 'updateCPR' must be made");
+    };
 
     Recipe.prototype.bruteForce = function() {
       var self;
       self = this;
       return Curl.scrape(this.req, function(req, res, err) {
-        return self.getResponse(req, res, err, function(cpr, status, html) {
-          console.log("Bruteforcing: " + cpr);
+        if (debug_mode === true) {
+          self.renderPreparationResponse(req, res, err);
+        }
+        return self.getResponse(req, res, function(cpr, status, html) {
           self.afterGetResponse(cpr, status, html);
           self.counter++;
           self.updateCPR();

@@ -1,9 +1,13 @@
-lebara = require("./recipes/Lebara.js")
+callme = require("./recipes/Callme.js")
 express = require("express")
 app = express.createServer()
 app.listen(3000)
 io = require("socket.io").listen(app);
 io.set('log level', 0); 
+inputDebugger = require("./utils/inputDebugger.js")
+
+# only use in debug_mode together with debugger.html (view)
+GLOBAL.debug_mode = true
 
 # routing
 app.use express.bodyParser()
@@ -22,19 +26,14 @@ app.get "/images/*", (req, res) ->
 app.get "/", (req, res) ->
 	res.sendfile __dirname + "/pages/index.html"
 
-###
-inputData =
-	firstName: "Peter"
-	lastName: "Hansen"
-	dob: '250188'
-	cprList: [1107,1235,9969]
-###	
 
 io.sockets.on('connection', (socket) ->
 
+	# start app when input data is received from client
 	socket.on("setInputData", (inputData) ->
-		recipe = new lebara.Lebara(inputData, socket)
+		recipe = new callme.Callme(inputData, socket)
 		recipe.prepareRequest () ->
 			recipe.bruteForce()
 	)
 );
+

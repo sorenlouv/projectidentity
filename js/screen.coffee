@@ -1,10 +1,9 @@
 # declare variables
-cprList = []
-countCompleted = 0
-dob = 0
+@cprList = []
+@countCompleted = 0
+@dob = 0
+window.socket = io.connect()
 
- # DOM ready
- ########################
 $(document).ready ->
 
 	$(".accordion").accordion
@@ -24,72 +23,11 @@ $(document).ready ->
 		console.log "next was clicked"
 
 	# find cpr numbers
-	$("#findValidNumbers").click(findValidNumbers);
+	$("#findValidNumbers").click setInputData
 
-findValidNumbers = ->
-	dob = $("input[name=dob]").val()
-	firstName = $("input[name=firstName]").val()
-	lastName = $("input[name=lastName]").val()
-	gender = $("input[name=gender]:checked").val()
-
-	$("#processFb, #stopTimer, #progressbars, #controllerContainer, #inputData").fadeToggle()
-	$("#inputData .content").html("Fødselsdag: " + dob + "<br> Fornavn: " + firstName + "<br> Efternavn: " + lastName).fadeIn()
-
-	# set permutations of CPR number
-	options = []
-	options[0] = [ 0, 1, 2, 3, 4, 9 ]
-	options[1] = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
-	options[2] = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
-	options[3] = (if gender is "male" then [ 1, 3, 5, 7, 9 ] else [ 0, 2, 4, 6, 8 ])
-
-	# find valid cpr numbers
-	recursiveSearch options, 0, 0, ->
-		console.log cprList
-
-		# send input data
-		socket.emit "setInputData",
-			dob: dob
-			firstName: firstName
-			lastName: lastName
-			cprList: cprList
-
-count = 0
-# Iterate all permutations of CPR number
-recursiveSearch = (options, number, depth, callback) ->
-  count++
-  number = number or ""
-  depth = depth or 0
-  i = 0
-
-  while i < options[depth].length
-    if depth + 1 < options.length
-      recursiveSearch options, number + options[depth][i], depth + 1, callback
-    else
-      cpr = number + options[depth][i]
-
-      # CPR is valid
-      cprList.push cpr if validateCPR(cpr)
-    i++
-  count--
-  callback() if count is 0
-
-# validate cpr
-validateCPR = (cpr) ->
-  fullcpr = dob + cpr
-  sum = 0
-  factors = [ 4, 3, 2, 7, 6, 5, 4, 3, 2, 1 ]
-  i = 0
-  while i < 10
-    sum += fullcpr.substring(i, i + 1) * factors[i]
-    i++
-  unless (sum % 11) is 0
-    false
-  else
-    true
 
 # SOCKET.IO
-##################
-socket = io.connect()
+#################################
 
 socket.socket.on('error', (reason) ->
   console.error('Unable to connect Socket.IO', reason);
@@ -117,20 +55,6 @@ socket.on('lookupFailed', (data) ->
 	$("#failedCpr .content").append(data.cpr + ', ').effect('highlight', {color: '#E78F08'});	
 );
 
-
-# simple function to return numbers of valid cpr numbers
-countCprList = ->
-	cprList.length;
-
-addToProgressbar = ->
-	countCompleted++
-	$( ".progressbar.completed" ).progressbar( "option", "value", (countCompleted/countCprList()*100) );
-
-
-#
-# Preparation debugging
-###########################################
-
 # server waiting for client
 socket.on "waitForClient", (data) ->
 	console.log "server waiting for client: " + data["name"]
@@ -138,28 +62,62 @@ socket.on "waitForClient", (data) ->
 	$("#next").button "enable"
 
 # receive response from server
-socket.on "renderResponse", (data) ->
+socket.on "renderPreparationResponse", (data) ->
 	# Debug
-	console.log "Data: "
 	console.log data
 
 	# reset
 	$(".accordion div").html ""
 
-	# set resp. body
+	# set url
+	$("#requestUrl").html data.req.url
+
+	# set response body
 	if data.res.body?
 		body = $(data.res.body.replace(/<script[\d\D]*?>[\d\D]*?<\/script>/g, ""), "body")
 		if body.find(data.domTarget).length is 0
 			body.appendTo "#responseBody"
 		else
 			body.find(data.domTarget).appendTo "#responseBody"
-	# set resp. header			
-	if data.res.head?
-		$("#responseHeader").html data.res.head.replace(/\n/g, "<br />")			
 
+	# set resp. header			
+	$("#responseHeader").html data.res.head.replace(/\n/g, "<br />") if data.res.head?
+		
 	# set errors
 	$("#errors").html JSON.stringify(data.err)
 
 	# set request header
 	$("#requestHeader").html JSON.stringify(data.req)
-	$(".accordion").accordion "resize"	
+	$(".accordion").accordion "resize"			
+
+
+# Helper functions
+#################################
+
+# simple function to return numbers of valid cpr numbers
+countCprList = ->
+	@cprList.length;
+
+addToProgressbar = ->
+	countCompleted++
+	$( ".progressbar.completed" ).progressbar( "option", "value", (countCompleted/countCprList()*100) );
+
+setInputData = ->
+	dob = $("input[name=dob]").val()
+	firstName = $("input[name=firstName]").val()
+	lastName = $("input[name=lastName]").val()
+	gender = $("input[name=gender]:checked").val()
+
+	generateCombinations dob, firstName, lastName, gender, (cprList) =>		
+		@cprList = cprList
+
+		# send input data to server
+		socket.emit "setInputData",
+			dob: dob
+			firstName: firstName
+			lastName: lastName
+			cprList: cprList			
+
+		# hide controller element and show progress bar
+		$("#processFb, #stopTimer, #progressbars, #controllerContainer, #inputData").fadeToggle()
+		$("#inputData .content").html("Fødselsdag: " + dob + "<br> Fornavn: " + firstName + "<br> Efternavn: " + lastName).fadeIn()

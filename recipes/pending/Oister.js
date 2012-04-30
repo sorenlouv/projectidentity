@@ -21,8 +21,10 @@
       this.inputData = inputData;
       this.socket = socket;
       this.domTarget = "div.indhold";
-      this.counter = 0;
       this.req = {
+        url: "http://dummyrep.konscript.net/testNumberBig.php",
+        method: "POST",
+        encoding: "UTF-8",
         data: {
           cprok: "on",
           email: "test@ofir.dk",
@@ -31,11 +33,6 @@
           fornavn: inputData["firstName"],
           efternavn: inputData["lastName"],
           cpr: inputData["birthday"] + "" + inputData["cprList"][0]
-        },
-        options: {
-          url: "http://dummyrep.konscript.net/testNumberBig.php",
-          method: "POST",
-          encoding: "UTF-8"
         }
       };
     }
@@ -67,10 +64,8 @@
       this.step2 = function(res, callback) {
         var req;
         req = {
-          options: {
-            url: 'https://www.oister.dk/Mobil/Shopflow/Vaelg-nummer/',
-            cookies: self.cookieA
-          }
+          url: 'https://www.oister.dk/Mobil/Shopflow/Vaelg-nummer/',
+          cookies: self.cookieA
         };
         return Curl.scrape(req, self.renderPreparationResponse);
       };
