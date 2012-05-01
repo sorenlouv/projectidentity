@@ -27,14 +27,23 @@ class @Lebara extends Recipe
 		@req.data.cpr = @inputData["dob"]+"-"+@inputData["cprList"][@counter]
 
 	getResponse: (req, res, callback) ->
+
+		cpr = querystring.parse(req.data).cpr
+
+		# Abort if no response is available
+		unless res?
+			callback(cpr, "error", "Could not get response")
+			return false
+
+		html = res.body
+		msg_regex = /alert\('(.+)'\)/.exec(html)
+		msg = if msg_regex? then msg_regex[1] else ""
 		
 		html = res.body
-		cpr = querystring.parse(req.data).cpr
-		msg = /alert\('(.+)'\)/.exec(html);
 		
 		if html.indexOf("NOVBetal") > -1
 		  callback cpr, "success", ""
 		else
-		  callback cpr, "error", msg[1]
+		  callback cpr, "error", msg
 
 module.exports = @Lebara

@@ -12,56 +12,50 @@
 
   querystring = require("querystring");
 
-  this.Lebara = (function(_super) {
+  this.Greentel = (function(_super) {
 
-    __extends(Lebara, _super);
+    __extends(Greentel, _super);
 
-    Lebara.name = 'Lebara';
+    Greentel.name = 'Greentel';
 
-    function Lebara(inputData, socket) {
+    function Greentel(inputData, socket) {
       this.inputData = inputData;
       this.socket = socket;
       this.counter = 0;
       this.domTarget = "";
       this.req = {
-        url: "https://mypage.lebara.dk/iframe/NOVcpr_iframe.asp",
+        'insecure': true,
+        url: "https://www.greentel.dk/index.php?ajax=true",
         data: {
-          cprok: "on",
-          email: "test@ofir.dk",
-          password1: "test1234",
-          password2: "test1234",
-          navn: inputData["firstName"] + " " + inputData["lastName"],
-          cpr: inputData["dob"] + "-" + inputData["cprList"][0]
+          up_ajax_action: "do_address_check",
+          cpr: inputData["dob"] + '' + inputData["cprList"][0],
+          fullname: inputData["lastName"]
         }
       };
     }
 
-    Lebara.prototype.updateCPR = function() {
-      return this.req.data.cpr = this.inputData["dob"] + "-" + this.inputData["cprList"][this.counter];
+    Greentel.prototype.updateCPR = function() {
+      return this.req.data.cpr = this.inputData["dob"] + "" + this.inputData["cprList"][this.counter];
     };
 
-    Lebara.prototype.getResponse = function(req, res, callback) {
-      var cpr, html, msg, msg_regex;
+    Greentel.prototype.getResponse = function(req, res, callback) {
+      var cpr;
       cpr = querystring.parse(req.data).cpr;
       if (res == null) {
         callback(cpr, "error", "Could not get response");
         return false;
       }
-      html = res.body;
-      msg_regex = /alert\('(.+)'\)/.exec(html);
-      msg = msg_regex != null ? msg_regex[1] : "";
-      html = res.body;
-      if (html.indexOf("NOVBetal") > -1) {
+      if (res.body.indexOf("#address") > -1) {
         return callback(cpr, "success", "");
       } else {
-        return callback(cpr, "error", msg);
+        return callback(cpr, "error", res.body);
       }
     };
 
-    return Lebara;
+    return Greentel;
 
   })(Recipe);
 
-  module.exports = this.Lebara;
+  module.exports = this.Greentel;
 
 }).call(this);
