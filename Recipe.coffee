@@ -20,7 +20,6 @@ class @Recipe
     cprList: {}
 
   renderPreparationResponse: (req, res, err) ->
-    console.log("Page loaded")
     @socket.emit "renderPreparationResponse", req: req, err: err, res: res, domTarget: @domTarget
 
   getResponse: (req, res, callback) ->
@@ -58,7 +57,7 @@ class @Recipe
 
   bruteForce: () ->
     self = @
-    Curl.scrape(@req, (req, res, err) ->
+    Curl.scrape(@req, (req, res = {}, err) ->
 
       # debugging
       self.renderPreparationResponse(req, res, err) if debug_mode is true
@@ -75,3 +74,5 @@ class @Recipe
 
     # trailing argument for Curl.scrape()
     , @settings)
+
+module.exports = @Recipe

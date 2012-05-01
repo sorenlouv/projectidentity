@@ -5,7 +5,12 @@
   Utils = {
     splitResponse: function(raw_response) {
       var location, res, status_code;
-      res = {};
+      res = {
+        head: "",
+        body: "",
+        status_code: 0,
+        location: ""
+      };
       raw_response = raw_response.split("\r\n\r\n");
       res.head = raw_response.shift();
       res.body = raw_response.join();

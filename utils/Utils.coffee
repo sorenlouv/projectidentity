@@ -1,7 +1,11 @@
 Utils =
      splitResponse: (raw_response) ->
           # response
-          res = {}
+          res = 
+            head: ""
+            body: ""
+            status_code: 0
+            location: ""
 
           # divide response into header and body
           raw_response = raw_response.split("\r\n\r\n") 

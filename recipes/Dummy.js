@@ -12,19 +12,19 @@
 
   querystring = require("querystring");
 
-  this.Lebara = (function(_super) {
+  this.Dummy = (function(_super) {
 
-    __extends(Lebara, _super);
+    __extends(Dummy, _super);
 
-    Lebara.name = 'Lebara';
+    Dummy.name = 'Dummy';
 
-    function Lebara(inputData, socket) {
+    function Dummy(inputData, socket) {
       this.inputData = inputData;
       this.socket = socket;
       this.counter = 0;
       this.domTarget = "";
       this.req = {
-        url: "https://mypage.lebara.dk/iframe/NOVcpr_iframe.asp",
+        url: "http://dummyrep.konscript.net/delay.php",
         data: {
           cprok: "on",
           email: "test@ofir.dk",
@@ -36,26 +36,31 @@
       };
     }
 
-    Lebara.prototype.updateCPR = function() {
+    Dummy.prototype.updateCPR = function() {
       return this.req.data.cpr = this.inputData["dob"] + "-" + this.inputData["cprList"][this.counter];
     };
 
-    Lebara.prototype.getResponse = function(req, res, callback) {
-      var cpr, html, msg;
-      html = res.body;
+    Dummy.prototype.getResponse = function(req, res, callback) {
+      var cpr, html, msg, msg_regex;
       cpr = querystring.parse(req.data).cpr;
-      msg = /alert\('(.+)'\)/.exec(html);
-      if (html.indexOf("NOVBetal") > -1) {
+      if (res == null) {
+        callback(cpr, "error", "Could not get response");
+        return false;
+      }
+      html = res.body;
+      msg_regex = /alert\('(.+)'\)/.exec(html);
+      msg = msg_regex != null ? msg_regex[1] : "";
+      if ((html != null) && html.indexOf("NOVBetal") > -1) {
         return callback(cpr, "success", "");
       } else {
-        return callback(cpr, "error", msg[1]);
+        return callback(cpr, "error", msg);
       }
     };
 
-    return Lebara;
+    return Dummy;
 
   })(Recipe);
 
-  module.exports = this.Lebara;
+  module.exports = this.Dummy;
 
 }).call(this);

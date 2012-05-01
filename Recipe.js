@@ -32,7 +32,6 @@
     };
 
     Recipe.prototype.renderPreparationResponse = function(req, res, err) {
-      console.log("Page loaded");
       return this.socket.emit("renderPreparationResponse", {
         req: req,
         err: err,
@@ -86,6 +85,9 @@
       var self;
       self = this;
       return Curl.scrape(this.req, function(req, res, err) {
+        if (res == null) {
+          res = {};
+        }
         if (debug_mode === true) {
           self.renderPreparationResponse(req, res, err);
         }
@@ -103,5 +105,7 @@
     return Recipe;
 
   })();
+
+  module.exports = this.Recipe;
 
 }).call(this);

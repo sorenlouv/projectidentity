@@ -27,7 +27,10 @@ Curl =
       
     # make curl request
     curl_request = curlrequest.request(req, (err, res_raw) ->
-      #console.log "Scraping finished " + curl_request
+      # debugging
+      if err?
+        console.log "ERROR: "
+        console.log err
       
       # format response into head and body (and location + status_code)
       res = Utils.splitResponse(res_raw) if res_raw?
@@ -43,8 +46,13 @@ Curl =
       include: true
 
     curl_request = curlrequest.request(options, (err, res) ->
+      # Debugging
+      unless err?
+        console.log "ERROR: "
+        console.log err
+
        # divide response into header and body
-      res = res.split("\r\n\r\n")    
+      res = res.split("\r\n\r\n")
 
       # get header (first part of array)
       head = res.shift()
@@ -52,7 +60,7 @@ Curl =
       # get cookie
       regex = /^Set-Cookie: (.*?);/m
       result = head.match(regex)
-      cookie = result[1]
+      cookie = (if (result?) then result[1] else "")
 
       console.log("Cookie: " + cookie)
       callback cookie

@@ -64,8 +64,12 @@
       var cpr, msg,
         _this = this;
       cpr = querystring.parse(req.data).CPR1 + querystring.parse(req.data).CPR2;
+      if (res == null) {
+        callback(cpr, "error", "Could not get response");
+        return false;
+      }
       msg = $(res.body).find("#orderForm .error").text();
-      if (res.body.indexOf("din adresse er hemmelig") > 0) {
+      if ((res.body != null) && res.body.indexOf("din adresse er hemmelig") > 0) {
         this.inputData.cprList = this.inputData.cprList.slice(this.counter + 1, this.inputData.cprList.length);
         console.log("Restarting with: ");
         console.log(this.inputData.cprList);
@@ -97,7 +101,7 @@
           return callback();
         });
       };
-      this.step2 = function(res, callback) {
+      this.step2 = function(res, nextStep) {
         var req;
         req = {
           url: "http://www.callme.dk/pow-basic/1",
@@ -110,10 +114,10 @@
           }
         };
         return Curl.scrape(req, function(req, res, err) {
-          return callback(req, res, err);
+          return nextStep(req, res, err);
         });
       };
-      this.step3 = function(res, callback) {
+      this.step3 = function(res, nextStep) {
         var req;
         req = {
           url: "http://www.callme.dk/pow-basic/2",
@@ -125,10 +129,10 @@
           }
         };
         return Curl.scrape(req, function(req, res, err) {
-          return callback(req, res, err);
+          return nextStep(req, res, err);
         });
       };
-      this.step4 = function(res, callback) {
+      this.step4 = function(res, nextStep) {
         var phonenumber, req;
         phonenumber = $(res.body).find(".tabs.show-newnumber input[name=newPhoneNumber]:first").val();
         req = {
@@ -147,7 +151,7 @@
           }
         };
         return Curl.scrape(req, function(req, res, err) {
-          return callback(req, res, err);
+          return nextStep(req, res, err);
         });
       };
       self = this;
@@ -173,7 +177,7 @@
 
     return Callme;
 
-  })(Recipe.Recipe);
+  })(Recipe);
 
   module.exports = this.Callme;
 

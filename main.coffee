@@ -1,4 +1,4 @@
-Recipe = require("./recipes/Callme.js")
+Recipe = require("./recipes/Dummy.js")
 express = require("express")
 app = express.createServer()
 app.listen(3000)
@@ -38,8 +38,8 @@ io.sockets.on('connection', (socket) ->
 			new Recipe(data.inputData, socket, data.session_cookie)
 		else
 			recipe = new Recipe(data.inputData, socket)
-			recipe.prepareRequest () ->
-				recipe.bruteForce()
+			#recipe.prepareRequest () ->
+			recipe.bruteForce()
 	)
 );
 

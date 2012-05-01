@@ -2,7 +2,7 @@
 (function() {
   var Recipe, app, express, io;
 
-  Recipe = require("./recipes/Callme.js");
+  Recipe = require("./recipes/Dummy.js");
 
   express = require("express");
 
@@ -48,9 +48,7 @@
         return new Recipe(data.inputData, socket, data.session_cookie);
       } else {
         recipe = new Recipe(data.inputData, socket);
-        return recipe.prepareRequest(function() {
-          return recipe.bruteForce();
-        });
+        return recipe.bruteForce();
       }
     });
   });

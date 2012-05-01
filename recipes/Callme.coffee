@@ -3,7 +3,7 @@ Curl = require("../utils/Curl.js")
 $ = require("jquery")
 querystring = require("querystring")
 
-class @Callme extends Recipe.Recipe
+class @Callme extends Recipe
 
   # constructor
   constructor: (inputData, socket, session_cookie) ->
@@ -49,10 +49,16 @@ class @Callme extends Recipe.Recipe
 
   getResponse: (req, res, callback) ->
     cpr = querystring.parse(req.data).CPR1 + querystring.parse(req.data).CPR2
+
+    # Abort if no response is available
+    unless res?
+      callback(cpr, "error", "Could not get response")
+      return false
+
     msg = $(res.body).find("#orderForm .error").text()
 
     # Skjult adresse problem: folk med skjult adresse påkræves at indtaste yderligere data. Hvis man rammer et sådant CPR nummer er eneste løsning pt. at fortsætte med ny session cookie
-    if res.body.indexOf("din adresse er hemmelig") > 0    
+    if res.body? and res.body.indexOf("din adresse er hemmelig") > 0    
 
       @inputData.cprList = @inputData.cprList.slice(@counter + 1,@inputData.cprList.length);
 
@@ -86,7 +92,7 @@ class @Callme extends Recipe.Recipe
         callback()
       )
 
-    @step2 = (res, callback) ->
+    @step2 = (res, nextStep) ->
 
       req =
         url: "http://www.callme.dk/pow-basic/1"
@@ -98,9 +104,9 @@ class @Callme extends Recipe.Recipe
           subscriptionId: "51"
             
       Curl.scrape req, (req, res, err) ->        
-        callback(req, res, err)
+        nextStep(req, res, err)
 
-    @step3 = (res, callback) ->
+    @step3 = (res, nextStep) ->
 
       req =
         url: "http://www.callme.dk/pow-basic/2"
@@ -111,9 +117,9 @@ class @Callme extends Recipe.Recipe
           personlige: "Videre til personlige oplysninger"
 
       Curl.scrape req, (req, res, err) ->
-        callback(req, res, err)
+        nextStep(req, res, err)
 
-    @step4 = (res, callback) ->
+    @step4 = (res, nextStep) ->
       phonenumber = $(res.body).find(".tabs.show-newnumber input[name=newPhoneNumber]:first").val()
 
       req =
@@ -131,7 +137,7 @@ class @Callme extends Recipe.Recipe
           saldoLimitAmount: ""
 
       Curl.scrape req, (req, res, err) ->
-        callback(req, res, err)
+        nextStep(req, res, err)
 
     self = @
     @step1 (req, res, err) -> self.waitForClient "step1", req, res, err, (res) ->

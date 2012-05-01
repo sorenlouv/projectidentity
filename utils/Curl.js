@@ -32,6 +32,10 @@
       }
       return curl_request = curlrequest.request(req, function(err, res_raw) {
         var res;
+        if (err != null) {
+          console.log("ERROR: ");
+          console.log(err);
+        }
         if (res_raw != null) {
           res = Utils.splitResponse(res_raw);
         }
@@ -46,11 +50,15 @@
       };
       return curl_request = curlrequest.request(options, function(err, res) {
         var cookie, head, regex, result;
+        if (err == null) {
+          console.log("ERROR: ");
+          console.log(err);
+        }
         res = res.split("\r\n\r\n");
         head = res.shift();
         regex = /^Set-Cookie: (.*?);/m;
         result = head.match(regex);
-        cookie = result[1];
+        cookie = ((result != null) ? result[1] : "");
         console.log("Cookie: " + cookie);
         return callback(cookie);
       });
