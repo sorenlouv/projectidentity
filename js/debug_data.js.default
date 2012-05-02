@@ -1,0 +1,11 @@
+// debugger
+window.socket.emit("setInputData", {
+	//session_cookie = "",
+	debug_mode: true,
+	inputData: {
+		firstName: "Firstname",
+		lastName: "LastName",
+		dob: '241288',
+		cprList: ["1234", "1235", "1236"]
+	}
+});
