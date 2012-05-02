@@ -1,4 +1,4 @@
-Recipe = require("./recipes/Greentel.js")
+Recipe = require("./recipes/Lebara.js")
 express = require("express")
 app = express.createServer()
 app.listen(3000)
