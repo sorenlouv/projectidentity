@@ -45,9 +45,13 @@
     };
 
     Recipe.prototype.afterGetResponse = function(cpr, status, msg) {
+      if (msg == null) {
+        msg = "";
+      }
       if (status === "success") {
         this.socket.emit("correctCpr", {
-          cpr: cpr
+          cpr: cpr,
+          msg: msg
         });
         return this.completed = true;
       } else {

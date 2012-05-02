@@ -37,6 +37,7 @@ socket.socket.on('error', (reason) ->
 socket.on('correctCpr', (data) ->
 	addToProgressbar()
 	console.log("Correct: " + data.cpr);
+	console.log(data);
 
 	$("#correctCpr").append(data.cpr + ' ').effect('highlight', {color: '#E78F08'});	
 );
@@ -47,7 +48,7 @@ socket.on('incorrectCpr', (data) ->
 	console.log("Incorrect: " + data.cpr);
 	container = $('<div></div>');
 	$('<p></p>', { text: "CPR: " + data.cpr }).appendTo(container);
-	$('<p></p>', { text: "Error message: " + data.msg }).appendTo(container);	
+	$('<p></p>', { text: data.msg }).appendTo(container);	
 	container.prependTo('#failedNumbers')
 );
 
@@ -104,7 +105,7 @@ countCprList = ->
 
 addToProgressbar = ->
 	countCompleted++
-	$( ".stats.completed" ).progressbar( "option", "value", (countCompleted/countCprList()*100) );
+	$( ".stats.completed" ).progressbar( "option", "value", (countCompleted / countCprList() * 100) );
 
 setInputData = ->
 	dob = $("input[name=dob]").val()

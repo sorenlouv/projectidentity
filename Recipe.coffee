@@ -25,9 +25,9 @@ class @Recipe
   getResponse: (req, res, callback) ->
     console.log("Warning: An implementation of 'getResponse' must be made")
 
-  afterGetResponse: (cpr, status, msg) ->
+  afterGetResponse: (cpr, status, msg = "") ->
     if status is "success"
-      @socket.emit "correctCpr", cpr: cpr
+      @socket.emit "correctCpr", cpr: cpr, msg: msg
       @completed = true
     else
       @socket.emit "incorrectCpr", cpr: cpr, msg: msg

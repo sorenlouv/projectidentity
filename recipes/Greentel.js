@@ -39,14 +39,16 @@
     };
 
     Greentel.prototype.getResponse = function(req, res, callback) {
-      var cpr;
+      var cpr, msg, msg_regex;
       cpr = querystring.parse(req.data).cpr;
-      if (res == null) {
+      if (!(res != null) || !(res.body != null)) {
         callback(cpr, "error", "Could not get response");
         return false;
       }
       if (res.body.indexOf("#address") > -1) {
-        return callback(cpr, "success", "");
+        msg_regex = /\$\('#address'\).val\('(.*)'\);/.exec(res.body);
+        msg = msg_regex != null ? msg_regex[1] : "";
+        return callback(cpr, "success", msg);
       } else {
         return callback(cpr, "error", res.body);
       }

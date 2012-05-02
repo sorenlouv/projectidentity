@@ -43,7 +43,7 @@
     Lebara.prototype.getResponse = function(req, res, callback) {
       var cpr, html, msg, msg_regex;
       cpr = querystring.parse(req.data).cpr;
-      if (res == null) {
+      if (!(res != null) || !(res.body != null)) {
         callback(cpr, "error", "Could not get response");
         return false;
       }

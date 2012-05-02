@@ -51,14 +51,14 @@ class @Callme extends Recipe
     cpr = querystring.parse(req.data).CPR1 + querystring.parse(req.data).CPR2
 
     # Abort if no response is available
-    unless res?
+    if !res? || !res.body?
       callback(cpr, "error", "Could not get response")
       return false
 
     msg = $(res.body).find("#orderForm .error").text()
 
     # Skjult adresse problem: folk med skjult adresse påkræves at indtaste yderligere data. Hvis man rammer et sådant CPR nummer er eneste løsning pt. at fortsætte med ny session cookie
-    if res.body? and res.body.indexOf("din adresse er hemmelig") > 0    
+    if res.body.indexOf("din adresse er hemmelig") > 0    
 
       @inputData.cprList = @inputData.cprList.slice(@counter + 1,@inputData.cprList.length);
 

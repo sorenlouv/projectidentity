@@ -64,12 +64,12 @@
       var cpr, msg,
         _this = this;
       cpr = querystring.parse(req.data).CPR1 + querystring.parse(req.data).CPR2;
-      if (res == null) {
+      if (!(res != null) || !(res.body != null)) {
         callback(cpr, "error", "Could not get response");
         return false;
       }
       msg = $(res.body).find("#orderForm .error").text();
-      if ((res.body != null) && res.body.indexOf("din adresse er hemmelig") > 0) {
+      if (res.body.indexOf("din adresse er hemmelig") > 0) {
         this.inputData.cprList = this.inputData.cprList.slice(this.counter + 1, this.inputData.cprList.length);
         console.log("Restarting with: ");
         console.log(this.inputData.cprList);

@@ -48,7 +48,9 @@
         return new Recipe(data.inputData, socket, data.session_cookie);
       } else {
         recipe = new Recipe(data.inputData, socket);
-        return recipe.bruteForce();
+        return recipe.prepareRequest(function() {
+          return recipe.bruteForce();
+        });
       }
     });
   });

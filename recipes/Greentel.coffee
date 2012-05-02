@@ -29,13 +29,15 @@ class @Greentel extends Recipe
 		cpr = querystring.parse(req.data).cpr
 
 		# Abort if no response is available
-		unless res?
+		if !res? || !res.body?
 			callback(cpr, "error", "Could not get response")
-			return false		
+			return false
 		
 		if res.body.indexOf("#address") > -1
-		  callback cpr, "success", ""
+			msg_regex = /\$\('#address'\).val\('(.*)'\);/.exec(res.body);
+			msg = if msg_regex? then msg_regex[1] else ""
+			callback cpr, "success", msg
 		else
-		  callback cpr, "error", res.body
+			callback cpr, "error", res.body
 
 module.exports = @Greentel

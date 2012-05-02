@@ -36,6 +36,7 @@
   socket.on('correctCpr', function(data) {
     addToProgressbar();
     console.log("Correct: " + data.cpr);
+    console.log(data);
     return $("#correctCpr").append(data.cpr + ' ').effect('highlight', {
       color: '#E78F08'
     });
@@ -50,7 +51,7 @@
       text: "CPR: " + data.cpr
     }).appendTo(container);
     $('<p></p>', {
-      text: "Error message: " + data.msg
+      text: data.msg
     }).appendTo(container);
     return container.prependTo('#failedNumbers');
   });

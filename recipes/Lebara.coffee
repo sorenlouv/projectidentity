@@ -31,7 +31,7 @@ class @Lebara extends Recipe
 		cpr = querystring.parse(req.data).cpr
 
 		# Abort if no response is available
-		unless res?
+		if !res? || !res.body?
 			callback(cpr, "error", "Could not get response")
 			return false
 
