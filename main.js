@@ -2,7 +2,7 @@
 (function() {
   var Recipe, app, express, io;
 
-  Recipe = require("./recipes/Greentel.js");
+  Recipe = require("./recipes/Lebara.js");
 
   express = require("express");
 
